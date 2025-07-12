@@ -2,7 +2,7 @@ services:
   - type: web
     name: fastfood-api
     plan: free
-    dockerfilePath: ./backend/deploy/Dockerfile
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: DATABASE_URL
         sync: false
