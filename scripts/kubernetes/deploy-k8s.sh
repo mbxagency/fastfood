@@ -45,7 +45,7 @@ fi
 
 # Build Docker image
 print_info "🔨 Construindo imagem Docker..."
-docker build -t fastfood-api:latest backend/
+docker build -f backend/deploy/Dockerfile -t fastfood-api:latest backend/
 
 print_success "Imagem Docker construída!"
 

@@ -35,7 +35,8 @@ chmod +x scripts/deploy-k8s.sh
 #### **Passo 1: Construir Imagem**
 ```bash
 # Construir imagem Docker
-docker build -t fastfood-api:latest backend/
+# Caminho correto do Dockerfile após reorganização:
+docker build -f backend/deploy/Dockerfile -t fastfood-api:latest backend/
 ```
 
 #### **Passo 2: Aplicar Recursos**

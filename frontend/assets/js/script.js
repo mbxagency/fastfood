@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = 'https://fastfood-api.onrender.com' || 'http://localhost:8000';
+const API_BASE_URL = 'https://fastfood-api.onrender.com';
 
 // Mock data for fallback
 const mockProducts = [
@@ -75,103 +75,74 @@ let apiProducts = [];
 let useMockData = false;
 
 // DOM elements
-const menuGrid = document.getElementById('menuGrid');
-const cartModal = document.getElementById('cartModal');
-const loginModal = document.getElementById('loginModal');
+const productsGrid = document.getElementById('productsGrid');
+const cartSidebar = document.getElementById('cartSidebar');
 const cartItems = document.getElementById('cartItems');
 const cartCount = document.getElementById('cartCount');
-const cartTotal = document.getElementById('cartTotal');
+const totalAmount = document.getElementById('totalAmount');
 const filterBtns = document.querySelectorAll('.filter-btn');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const closeCartBtn = document.getElementById('closeCart');
+const cartIcon = document.getElementById('cartIcon');
+const cartOverlay = document.getElementById('cartOverlay');
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 FastFood iniciando...');
     setupEventListeners();
     updateCartDisplay();
     loadProductsFromAPI();
 });
 
-// Setup event listeners
 function setupEventListeners() {
-    // Cart button
-    const cartBtn = document.getElementById('cartBtn');
-    if (cartBtn) {
-        cartBtn.addEventListener('click', openCart);
+    // Cart icon
+    if (cartIcon) {
+        cartIcon.addEventListener('click', openCart);
     }
-    
-    // Login button
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', openLogin);
+    // Close cart
+    if (closeCartBtn) {
+        closeCartBtn.addEventListener('click', closeCart);
     }
-    
-    // Modal close buttons
-    document.querySelectorAll('.modal-close').forEach(btn => {
-        btn.addEventListener('click', function() {
-            closeCart();
-            closeLogin();
-        });
-    });
-    
+    // Overlay
+    if (cartOverlay) {
+        cartOverlay.addEventListener('click', closeCart);
+    }
+    // Checkout
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', checkout);
+    }
     // Filter buttons
     filterBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const category = this.dataset.category;
             filterProducts(category);
-            
-            // Update active button
             filterBtns.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
         });
     });
-    
-    // Close modals when clicking outside
-    window.addEventListener('click', function(e) {
-        if (e.target === cartModal) closeCart();
-        if (e.target === loginModal) closeLogin();
-    });
-    
-    // Smooth scrolling for navigation
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
-    
-    // Mobile menu toggle
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const mobileMenu = document.querySelector('.mobile-menu');
-    if (mobileMenuBtn && mobileMenu) {
-        mobileMenuBtn.addEventListener('click', function() {
-            mobileMenu.classList.toggle('active');
-        });
-    }
+}
+
+function openCart() {
+    if (cartSidebar) cartSidebar.classList.add('open');
+    if (cartOverlay) cartOverlay.classList.add('active');
+}
+function closeCart() {
+    if (cartSidebar) cartSidebar.classList.remove('open');
+    if (cartOverlay) cartOverlay.classList.remove('active');
 }
 
 // Load products from API
 async function loadProductsFromAPI() {
     try {
-        console.log('🔗 Carregando produtos da API...');
         showLoadingState();
-        
         const response = await fetch(`${API_BASE_URL}/v1/api/public/produtos`);
         if (response.ok) {
             apiProducts = await response.json();
             useMockData = false;
-            console.log('✅ Produtos carregados da API:', apiProducts.length);
             loadProducts();
         } else {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
     } catch (error) {
-        console.warn('⚠️ Erro ao carregar produtos da API, usando dados mock:', error);
         apiProducts = mockProducts;
         useMockData = true;
         showNotification('Usando dados de demonstração (API indisponível)', 'info');
@@ -179,11 +150,9 @@ async function loadProductsFromAPI() {
     }
 }
 
-// Show loading state
 function showLoadingState() {
-    if (!menuGrid) return;
-    
-    menuGrid.innerHTML = `
+    if (!productsGrid) return;
+    productsGrid.innerHTML = `
         <div class="loading-state">
             <div class="loading-spinner"></div>
             <p>Carregando produtos...</p>
@@ -191,34 +160,11 @@ function showLoadingState() {
     `;
 }
 
-// Show error state
-function showErrorState() {
-    if (!menuGrid) return;
-    
-    menuGrid.innerHTML = `
-        <div class="error-state">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h3>Erro ao carregar produtos</h3>
-            <p>Não foi possível carregar o cardápio. Tente novamente mais tarde.</p>
-            <button class="btn btn-primary" onclick="loadProductsFromAPI()">
-                <i class="fas fa-redo"></i>
-                Tentar Novamente
-            </button>
-        </div>
-    `;
-}
-
-// Load products
 function loadProducts() {
-    if (!menuGrid) {
-        console.error('❌ Elemento menuGrid não encontrado');
-        return;
-    }
-    
-    menuGrid.innerHTML = '';
-    
+    if (!productsGrid) return;
+    productsGrid.innerHTML = '';
     if (apiProducts.length === 0) {
-        menuGrid.innerHTML = `
+        productsGrid.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-utensils"></i>
                 <h3>Nenhum produto disponível</h3>
@@ -227,15 +173,11 @@ function loadProducts() {
         `;
         return;
     }
-    
     const filteredProducts = currentCategory === 'all' 
         ? apiProducts 
         : apiProducts.filter(product => product.categoria === currentCategory);
-    
-    console.log(`📦 Carregando ${filteredProducts.length} produtos para categoria: ${currentCategory}`);
-    
     if (filteredProducts.length === 0) {
-        menuGrid.innerHTML = `
+        productsGrid.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-filter"></i>
                 <h3>Nenhum produto nesta categoria</h3>
@@ -244,24 +186,19 @@ function loadProducts() {
         `;
         return;
     }
-    
     filteredProducts.forEach(product => {
         const productCard = createProductCard(product);
-        menuGrid.appendChild(productCard);
+        productsGrid.appendChild(productCard);
     });
 }
 
-// Create product card
 function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card fade-in';
-    
-    // Use API data from Render PostgreSQL
     const name = product.nome;
     const description = product.descricao;
     const price = product.preco;
     const icon = getCategoryIcon(product.categoria);
-    
     card.innerHTML = `
         <div class="product-image">
             <i class="${icon}"></i>
@@ -278,87 +215,50 @@ function createProductCard(product) {
             </div>
         </div>
     `;
-    
     return card;
 }
 
-// Get category icon based on category name
 function getCategoryIcon(category) {
-    const iconMap = {
-        'burgers': 'fas fa-hamburger',
-        'drinks': 'fas fa-wine-bottle',
-        'sides': 'fas fa-french-fries',
-        'desserts': 'fas fa-ice-cream',
-        'default': 'fas fa-utensils'
-    };
-    
-    return iconMap[category] || iconMap.default;
+    switch (category) {
+        case 'burgers': return 'fas fa-hamburger';
+        case 'drinks': return 'fas fa-wine-bottle';
+        case 'sides': return 'fas fa-french-fries';
+        case 'desserts': return 'fas fa-ice-cream';
+        default: return 'fas fa-utensils';
+    }
 }
 
-// Filter products
 function filterProducts(category) {
     currentCategory = category;
     loadProducts();
 }
 
-// Cart functions
 function addToCart(productId) {
     const product = apiProducts.find(p => p.id === productId);
-    if (!product) {
-        console.error('Produto não encontrado:', productId);
-        return;
-    }
-    
+    if (!product) return;
     const existingItem = cart.find(item => item.id === productId);
-    
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
-        cart.push({
-            ...product,
-            quantity: 1
-        });
+        cart.push({ ...product, quantity: 1 });
     }
-    
     updateCartDisplay();
     showNotification(`${product.nome} adicionado ao carrinho!`);
-}
-
-function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
-    updateCartDisplay();
-}
-
-function updateQuantity(productId, change) {
-    const item = cart.find(item => item.id === productId);
-    if (item) {
-        item.quantity += change;
-        if (item.quantity <= 0) {
-            removeFromCart(productId);
-        } else {
-            updateCartDisplay();
-        }
-    }
 }
 
 function updateCartDisplay() {
     // Update cart count
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    if (cartCount) {
-        cartCount.textContent = totalItems;
-    }
-    
+    if (cartCount) cartCount.textContent = totalItems;
     // Update cart items
     if (cartItems) {
         cartItems.innerHTML = '';
-        
         if (cart.length === 0) {
             cartItems.innerHTML = '<p style="text-align: center; color: #64748b;">Seu carrinho está vazio</p>';
         } else {
             cart.forEach(item => {
                 const cartItem = document.createElement('div');
                 cartItem.className = 'cart-item';
-                
                 cartItem.innerHTML = `
                     <div class="cart-item-info">
                         <div class="cart-item-title">${item.nome}</div>
@@ -375,63 +275,36 @@ function updateCartDisplay() {
                         </button>
                     </div>
                 `;
-                
                 cartItems.appendChild(cartItem);
             });
         }
     }
-    
     // Update total
-    const total = cart.reduce((sum, item) => {
-        return sum + (item.preco * item.quantity);
-    }, 0);
-    
-    if (cartTotal) {
-        cartTotal.textContent = total.toFixed(2);
-    }
+    const total = cart.reduce((sum, item) => sum + (item.preco * item.quantity), 0);
+    if (totalAmount) totalAmount.textContent = `R$ ${total.toFixed(2)}`;
 }
 
-// Modal functions
-function openCart() {
-    if (cartModal) {
-        cartModal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
+function updateQuantity(productId, delta) {
+    const item = cart.find(i => i.id === productId);
+    if (!item) return;
+    item.quantity += delta;
+    if (item.quantity <= 0) {
+        cart = cart.filter(i => i.id !== productId);
     }
+    updateCartDisplay();
 }
 
-function closeCart() {
-    if (cartModal) {
-        cartModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
+function removeFromCart(productId) {
+    cart = cart.filter(i => i.id !== productId);
+    updateCartDisplay();
 }
 
-function openLogin() {
-    if (loginModal) {
-        loginModal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    }
-}
-
-function closeLogin() {
-    if (loginModal) {
-        loginModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-
-// Checkout function
 async function checkout() {
     if (cart.length === 0) {
         showNotification('Adicione itens ao carrinho primeiro!', 'error');
         return;
     }
-    
-    const total = cart.reduce((sum, item) => {
-        return sum + (item.preco * item.quantity);
-    }, 0);
-    
-    // If using mock data, show demo message
+    const total = cart.reduce((sum, item) => sum + (item.preco * item.quantity), 0);
     if (useMockData) {
         showNotification('Demonstração: Pedido processado com sucesso!', 'success');
         cart = [];
@@ -439,11 +312,8 @@ async function checkout() {
         closeCart();
         return;
     }
-    
-    // Try to create order via API
     try {
         showNotification('Processando pedido...', 'info');
-        
         const orderData = {
             items: cart.map(item => ({
                 produto_id: item.id,
@@ -452,15 +322,11 @@ async function checkout() {
             })),
             total: total
         };
-        
         const response = await fetch(`${API_BASE_URL}/v1/api/public/pedidos`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
-        
         if (response.ok) {
             const result = await response.json();
             showNotification(`Pedido criado com sucesso! ID: ${result.id}`, 'success');
@@ -468,27 +334,21 @@ async function checkout() {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
     } catch (error) {
-        console.warn('Erro ao criar pedido via API:', error);
         showNotification('Erro ao processar pedido. Tente novamente.', 'error');
         return;
     }
-    
     cart = [];
     updateCartDisplay();
     closeCart();
 }
 
-// Utility functions
 function showNotification(message, type = 'success') {
-    // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.innerHTML = `
         <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}"></i>
         <span>${message}</span>
     `;
-    
-    // Add styles
     notification.style.cssText = `
         position: fixed;
         top: 100px;
@@ -506,10 +366,7 @@ function showNotification(message, type = 'success') {
         max-width: 300px;
         font-size: 14px;
     `;
-    
     document.body.appendChild(notification);
-    
-    // Remove after 3 seconds
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease-out';
         setTimeout(() => {
@@ -518,38 +375,6 @@ function showNotification(message, type = 'success') {
             }
         }, 300);
     }, 3000);
-}
-
-// Navigation functions
-function scrollToMenu() {
-    const menuSection = document.getElementById('menu');
-    if (menuSection) {
-        menuSection.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
-    }
-}
-
-function showDemo() {
-    showNotification('Demonstração do sistema iniciada!', 'info');
-    
-    // Simulate some demo actions
-    setTimeout(() => {
-        if (apiProducts.length > 0) {
-            addToCart(apiProducts[0].id);
-        }
-    }, 500);
-    
-    setTimeout(() => {
-        if (apiProducts.length > 1) {
-            addToCart(apiProducts[1].id);
-        }
-    }, 1000);
-    
-    setTimeout(() => {
-        openCart();
-    }, 1500);
 }
 
 // Add CSS animations and states

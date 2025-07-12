@@ -72,6 +72,21 @@ echo "✅ Verificação do banco"
 echo "✅ Health checks"
 echo ""
 
+print_info "🌐 Configuração do Frontend (Vercel):"
+echo ""
+echo "O frontend está configurado para:"
+echo "✅ Servir arquivos estáticos"
+echo "✅ Headers de segurança"
+echo "✅ CORS configurado"
+echo "✅ API URL configurada"
+echo ""
+
+print_info "🐳 Configuração Docker:"
+echo ""
+echo "Para build local:"
+echo "docker build -f backend/deploy/Dockerfile -t fastfood-api:latest backend/"
+echo ""
+
 print_success "✅ Setup concluído!"
 print_info "💡 Dica: Você pode copiar e colar as variáveis acima diretamente no Render"
 
@@ -81,5 +96,5 @@ read -r response
 if [[ "$response" =~ ^[Yy]$ ]]; then
     echo ""
     print_info "Executando verificação..."
-    ./scripts/verify-deploy.sh
+    ./scripts/verify/verify-deploy.sh
 fi 

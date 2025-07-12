@@ -36,4 +36,6 @@ services:
       - key: VERSION
         value: 1.0.0
       - key: LOG_LEVEL
-        value: INFO 
+        value: INFO
+    healthCheckPath: /health
+    autoDeploy: true 

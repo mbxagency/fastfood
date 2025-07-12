@@ -34,19 +34,21 @@ show_help() {
     echo ""
     echo "Comandos disponíveis:"
     echo ""
-    echo "  setup     - Configurar variáveis de ambiente"
-    echo "  verify    - Verificar deploy"
-    echo "  deploy    - Deploy completo"
-    echo "  k8s       - Deploy Kubernetes"
-    echo "  dev       - Desenvolvimento local"
-    echo "  test      - Executar testes"
-    echo "  clean     - Limpar arquivos temporários"
-    echo "  help      - Mostrar esta ajuda"
+    echo "  setup         - Configurar variáveis de ambiente"
+    echo "  verify        - Verificar deploy"
+    echo "  deploy        - Deploy completo"
+    echo "  k8s           - Deploy Kubernetes"
+    echo "  dev           - Desenvolvimento backend local"
+    echo "  dev-frontend  - Desenvolvimento frontend local"
+    echo "  test          - Executar testes"
+    echo "  clean         - Limpar arquivos temporários"
+    echo "  help          - Mostrar esta ajuda"
     echo ""
     echo "Exemplos:"
     echo "  ./scripts/main.sh setup"
     echo "  ./scripts/main.sh verify"
-    echo "  ./scripts/main.sh deploy"
+    echo "  ./scripts/main.sh dev"
+    echo "  ./scripts/main.sh dev-frontend"
 }
 
 run_setup() {
@@ -96,7 +98,35 @@ run_dev() {
     
     # Start development server
     print_info "Iniciando servidor de desenvolvimento..."
+    print_info "Backend: http://localhost:8000"
+    print_info "API Docs: http://localhost:8000/docs"
+    print_info "Health: http://localhost:8000/health"
     uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+}
+
+run_dev_frontend() {
+    print_info "Iniciando desenvolvimento do frontend..."
+    
+    cd frontend
+    
+    # Check if Python is available for simple server
+    if command -v python3 &> /dev/null; then
+        print_info "Iniciando servidor Python..."
+        print_info "Frontend: http://localhost:3000"
+        python3 -m http.server 3000
+    elif command -v python &> /dev/null; then
+        print_info "Iniciando servidor Python..."
+        print_info "Frontend: http://localhost:3000"
+        python -m http.server 3000
+    elif command -v npx &> /dev/null; then
+        print_info "Iniciando servidor Node.js..."
+        print_info "Frontend: http://localhost:3000"
+        npx serve . -p 3000
+    else
+        print_error "Nenhum servidor disponível. Instale Python ou Node.js"
+        print_info "Ou abra o arquivo frontend/index.html diretamente no navegador"
+        exit 1
+    fi
 }
 
 run_test() {
@@ -146,6 +176,9 @@ case "${1:-help}" in
         ;;
     dev)
         run_dev
+        ;;
+    dev-frontend)
+        run_dev_frontend
         ;;
     test)
         run_test

@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "fastfood-frontend",
   "builds": [
     {
       "src": "frontend/**",
@@ -13,9 +12,35 @@
       "dest": "/frontend/$1"
     }
   ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    }
+  ],
+  "functions": {},
   "env": {
     "API_URL": "https://fastfood-api.onrender.com"
-  },
-  "regions": ["gru1"],
-  "public": true
+  }
 } 

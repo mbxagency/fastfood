@@ -185,6 +185,13 @@ python scripts/database/init_database.py
 uvicorn src.main:app --reload
 ```
 
+### **Build Docker manual/local**
+
+Se for rodar o build manualmente, use:
+```bash
+docker build -f backend/deploy/Dockerfile -t fastfood-api:latest backend/
+```
+
 ## 📊 API Endpoints
 
 ### **Públicos**
