@@ -49,9 +49,11 @@ No Render, vá em **Environment** e adicione:
 ```env
 DATABASE_URL=postgresql://postgres.cpntprlstlhubeivkpzq:postech_fiap_2025@aws-0-us-east-2.pooler.supabase.com:6543/postgres
 SECRET_KEY=fastfood-secret-key-2025-change-in-production
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 ENVIRONMENT=production
 DEBUG=false
-CORS_ALLOW_ORIGINS=https://fastfood.vercel.app
+CORS_ALLOW_ORIGINS=https://fastfood-murex.vercel.app,https://fastfood-git-main-mbxagencycwb-9232s-projects.vercel.app,https://fastfood-c2s784n7q-mbxagencycwb-9232s-projects.vercel.app
 API_PREFIX=/v1
 PROJECT_NAME=FastFood API
 VERSION=1.0.0
@@ -216,7 +218,7 @@ render logs
 
 Após o deploy, você terá:
 
-- **Frontend**: `https://fastfood.vercel.app`
+- **Frontend**: `https://fastfood-murex.vercel.app`
 - **Backend**: `https://fastfood-api.onrender.com`
 - **Database**: Supabase (já configurado)
 - **Docs**: `https://fastfood-api.onrender.com/docs`
