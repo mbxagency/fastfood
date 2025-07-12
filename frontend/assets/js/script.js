@@ -502,7 +502,25 @@ const Products = {
     async loadProducts() {
         try {
             console.log('🔄 Carregando produtos do backend...');
-            const products = await API.getProducts();
+            
+            // Add timeout to the fetch request
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            
+            const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.PRODUCTS}`, {
+                signal: controller.signal,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const products = await response.json();
             console.log('📦 Produtos carregados:', products);
             
             if (!products || products.length === 0) {
@@ -512,9 +530,15 @@ const Products = {
             STATE.products = products;
             this.renderProducts(products);
             Utils.showNotification(`${products.length} produtos carregados!`, 'success');
+            
         } catch (error) {
             console.error('❌ Erro ao carregar produtos:', error);
-            Utils.showNotification('Erro ao carregar produtos do backend', 'error');
+            
+            if (error.name === 'AbortError') {
+                Utils.showNotification('Timeout ao carregar produtos', 'error');
+            } else {
+                Utils.showNotification('Erro ao carregar produtos do backend', 'error');
+            }
             
             // Show loading error state
             const productsGrid = document.getElementById('productsGrid');
@@ -757,7 +781,7 @@ const LoadingScreen = {
 };
 
 // ===== INITIALIZATION =====
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     console.log('🍔 BurgerHouse - Inicializando...');
     
     // Initialize all modules immediately
@@ -768,21 +792,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     Forms.init();
     Cart.loadFromStorage();
     
-    // Load products from backend with timeout
-    try {
-        await Promise.race([
-            Products.loadProducts(),
-            new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout ao carregar produtos')), 10000)
-            )
-        ]);
-    } catch (error) {
-        console.error('❌ Erro na inicialização:', error);
-        Utils.showNotification('Erro ao conectar com o backend', 'error');
-    }
-    
     // Hide loading screen immediately
     LoadingScreen.hide();
+    
+    // Load products in background (non-blocking)
+    setTimeout(() => {
+        Products.loadProducts().catch(error => {
+            console.error('❌ Erro ao carregar produtos:', error);
+            Utils.showNotification('Erro ao carregar produtos do backend', 'error');
+        });
+    }, 100);
     
     console.log('✅ BurgerHouse - Inicializado com sucesso!');
 });
