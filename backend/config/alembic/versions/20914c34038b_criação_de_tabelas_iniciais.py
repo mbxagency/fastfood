@@ -50,7 +50,8 @@ def upgrade() -> None:
     sa.Column('categoria', sa.String(), nullable=False),
     sa.Column('preco', sa.Float(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('id')
+    sa.UniqueConstraint('id'),
+    sa.UniqueConstraint('nome')
     )
     op.create_table('tb_pedidos',
     sa.Column('id', sa.UUID(), nullable=False),

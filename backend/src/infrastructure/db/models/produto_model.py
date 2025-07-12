@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, Float, String
+from sqlalchemy import Column, Float, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 
 from src.infrastructure.db.session import Base
@@ -8,6 +8,8 @@ from src.infrastructure.db.session import Base
 
 class ProdutoModel(Base):
     __tablename__ = "tb_produtos"
+    __table_args__ = (UniqueConstraint('nome', name='uq_produto_nome'),)
+    
     id = Column(
         UUID(as_uuid=True),
         primary_key=True,
