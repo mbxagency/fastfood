@@ -1,0 +1,120 @@
+@startuml Arquitetura Kubernetes - Fase 2
+title Arquitetura Kubernetes - Sistema de Autoatendimento Fast Food - Fase 2
+
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+
+!define NAMESPACE_COLOR #E8F4FD
+!define POD_COLOR #B8E6B8
+!define SERVICE_COLOR #FFE6B8
+!define INGRESS_COLOR #E6B8FF
+!define PV_COLOR #FFB8B8
+!define CONFIG_COLOR #B8B8FF
+!define HPA_COLOR #FFFFB8
+
+package "Namespace: postech-fase2" as NS NAMESPACE_COLOR {
+
+    ' ConfigMaps e Secrets
+    rectangle "ConfigMap\npostech-app-config" as CM CONFIG_COLOR
+    rectangle "Secret\npostech-app-secrets" as SEC CONFIG_COLOR
+
+    ' Persistent Volumes
+    rectangle "PersistentVolume\npostgres-pv" as PV PV_COLOR
+    rectangle "PersistentVolumeClaim\npostgres-pvc" as PVC PV_COLOR
+
+    ' PostgreSQL
+    rectangle "PostgreSQL Pod" as PG_POD POD_COLOR {
+        rectangle "postgres:15" as PG_CONTAINER
+    }
+    rectangle "Service\npostgres-service\nClusterIP:5432" as PG_SVC SERVICE_COLOR
+
+    ' Aplicação Principal
+    rectangle "App Pod 1" as APP_POD1 POD_COLOR {
+        rectangle "postech-app:latest" as APP_CONTAINER1
+    }
+    rectangle "App Pod 2" as APP_POD2 POD_COLOR {
+        rectangle "postech-app:latest" as APP_CONTAINER2
+    }
+    rectangle "Service\npostech-app-service\nClusterIP:80" as APP_SVC SERVICE_COLOR
+
+    ' HPA
+    rectangle "HorizontalPodAutoscaler\npostech-app-hpa\n2-10 replicas" as HPA HPA_COLOR
+
+    ' Ingress
+    rectangle "Ingress\npostech-app-ingress" as ING INGRESS_COLOR
+
+    ' Health Checks
+    rectangle "Liveness Probe\n/health" as LP
+    rectangle "Readiness Probe\n/health" as RP
+
+}
+
+' Conexões
+CM --> APP_CONTAINER1 : env vars
+CM --> APP_CONTAINER2 : env vars
+SEC --> APP_CONTAINER1 : secrets
+SEC --> APP_CONTAINER2 : secrets
+SEC --> PG_CONTAINER : POSTGRES_PASSWORD
+
+PV --> PVC : bound
+PVC --> PG_CONTAINER : volume mount
+
+PG_CONTAINER --> PG_SVC : exposes
+PG_SVC --> APP_CONTAINER1 : DATABASE_URL
+PG_SVC --> APP_CONTAINER2 : DATABASE_URL
+
+APP_CONTAINER1 --> APP_SVC : exposes
+APP_CONTAINER2 --> APP_SVC : exposes
+APP_SVC --> ING : backend
+
+HPA --> APP_POD1 : scales
+HPA --> APP_POD2 : scales
+
+LP --> APP_CONTAINER1 : health check
+RP --> APP_CONTAINER1 : health check
+LP --> APP_CONTAINER2 : health check
+RP --> APP_CONTAINER2 : health check
+
+' External
+cloud "Internet" as INTERNET
+INTERNET --> ING : HTTP/HTTPS
+
+' Resource Limits
+note top of APP_CONTAINER1
+  Resources:
+  - CPU: 100m-200m
+  - Memory: 128Mi-256Mi
+end note
+
+note top of PG_CONTAINER
+  Resources:
+  - CPU: 500m-1000m
+  - Memory: 512Mi-1Gi
+end note
+
+note top of HPA
+  Scaling Rules:
+  - CPU: 70%
+  - Memory: 80%
+  - Min: 2 replicas
+  - Max: 10 replicas
+end note
+
+' Security
+note bottom of APP_CONTAINER1
+  Security:
+  - Non-root user
+  - Read-only filesystem
+  - No privileged access
+end note
+
+note bottom of PG_CONTAINER
+  Security:
+  - Non-root user
+  - Secrets for passwords
+  - Network isolation
+end note
+
+@enduml 

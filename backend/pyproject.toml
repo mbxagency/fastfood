@@ -1,0 +1,58 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Thais Gomes",email = "thaismrgs@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+package-mode = false
+
+dependencies = [
+    "fastapi (==0.104.1)",
+    "uvicorn (==0.24.0)",
+    "sqlalchemy (==2.0.23)",
+    "alembic (==1.12.1)",
+    "psycopg2-binary (==2.9.9)",
+    "python-dotenv (==1.0.0)",
+    "pydantic[email] (>=2.11.5,<3.0.0)",
+    "pydantic-settings (==2.1.0)",
+    "python-jose[cryptography] (==3.3.0)",
+    "passlib[bcrypt] (==1.7.4)",
+    "python-multipart (==0.0.6)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+ruff = "^0.11.9"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501", # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
+    "W191", # indentation contains tabs
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"tests/**" = ["S"]
+"scripts/**" = ["S"]
+"alembic/**" = ["S", "I001", "UP007", "UP035", "F403", "W291", "W292", "W293"]
+"alembic/versions/*.py" = ["I001", "UP007", "UP035", "W291", "W292", "W293"]
+

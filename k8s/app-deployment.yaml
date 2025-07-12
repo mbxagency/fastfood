@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postech-app-deployment
+  namespace: postech-fase2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: postech-app
+  template:
+    metadata:
+      labels:
+        app: postech-app
+    spec:
+      containers:
+      - name: postech-app
+        image: postech-app:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: postech-app-config
+              key: DATABASE_URL
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: postech-app-config
+              key: ENVIRONMENT
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: postech-app-config
+              key: LOG_LEVEL
+        - name: CORS_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: postech-app-config
+              key: CORS_ORIGINS
+        - name: API_PREFIX
+          valueFrom:
+            configMapKeyRef:
+              name: postech-app-config
+              key: API_PREFIX
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: postech-app-secrets
+              key: JWT_SECRET_KEY
+        - name: MERCADO_PAGO_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: postech-app-secrets
+              key: MERCADO_PAGO_ACCESS_TOKEN
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postech-app-service
+  namespace: postech-fase2
+spec:
+  selector:
+    app: postech-app
+  ports:
+  - port: 80
+    targetPort: 8000
+  type: ClusterIP 

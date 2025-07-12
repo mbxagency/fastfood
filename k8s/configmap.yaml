@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postech-app-config
+  namespace: postech-fase2
+data:
+  DATABASE_URL: "postgresql://postgres:postgres@postgres-service:5432/postech"
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+  CORS_ORIGINS: "*"
+  API_PREFIX: "/v1" 

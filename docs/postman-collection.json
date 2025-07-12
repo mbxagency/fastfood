@@ -1,0 +1,377 @@
+{
+  "info": {
+    "name": "Postech Fast Food API - Fase 2",
+    "description": "Collection completa da API do sistema de autoatendimento de fast food",
+    "version": "2.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Autenticação",
+      "item": [
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/public/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "public", "auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('admin_token', response.access_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Criar/Obter Cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao@email.com\",\n  \"cpf\": \"12345678901\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/public/clientes/",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "public", "clientes", ""]
+            }
+          }
+        },
+        {
+          "name": "Listar Clientes (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/api/admin/clientes/",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "admin", "clientes", ""]
+            }
+          }
+        },
+        {
+          "name": "Buscar Cliente por CPF (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/api/admin/clientes/12345678901",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "admin", "clientes", "12345678901"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Produtos",
+      "item": [
+        {
+          "name": "Listar Produtos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/public/produtos/",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "public", "produtos", ""]
+            }
+          }
+        },
+        {
+          "name": "Criar Produto (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"X-Burger\",\n  \"descricao\": \"Hambúrguer com queijo e salada\",\n  \"preco\": 15.90,\n  \"categoria_id\": \"123e4567-e89b-12d3-a456-426614174000\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/admin/produtos/",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "admin", "produtos", ""]
+            }
+          }
+        },
+        {
+          "name": "Deletar Produto (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/api/admin/produtos/123e4567-e89b-12d3-a456-426614174000",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "admin", "produtos", "123e4567-e89b-12d3-a456-426614174000"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "item": [
+        {
+          "name": "Checkout Pedido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"itens\": [\n    {\n      \"produto_id\": \"123e4567-e89b-12d3-a456-426614174001\",\n      \"quantidade\": 2\n    }\n  ],\n  \"observacoes\": \"Sem cebola\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/public/pedidos/checkout",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "public", "pedidos", "checkout"]
+            }
+          }
+        },
+        {
+          "name": "Criar Pedido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"itens\": [\n    {\n      \"produto_id\": \"123e4567-e89b-12d3-a456-426614174001\",\n      \"quantidade\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/public/pedidos/",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "public", "pedidos", ""]
+            }
+          }
+        },
+        {
+          "name": "Consultar Status do Pedido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/public/pedidos/123e4567-e89b-12d3-a456-426614174000",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "public", "pedidos", "123e4567-e89b-12d3-a456-426614174000"]
+            }
+          }
+        },
+        {
+          "name": "Listar Pedidos Ordenados (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/api/admin/pedidos/",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "admin", "pedidos", ""]
+            }
+          }
+        },
+        {
+          "name": "Listar Pedidos em Aberto (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/api/admin/pedidos/em-aberto",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "admin", "pedidos", "em-aberto"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Status do Pedido (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Em preparação\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/admin/pedidos/123e4567-e89b-12d3-a456-426614174000/status",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "admin", "pedidos", "123e4567-e89b-12d3-a456-426614174000", "status"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Pedido (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/api/admin/pedidos/123e4567-e89b-12d3-a456-426614174000",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "admin", "pedidos", "123e4567-e89b-12d3-a456-426614174000"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pagamento",
+      "item": [
+        {
+          "name": "Gerar QR Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/public/pagamento/qrcode",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "public", "pagamento", "qrcode"]
+            }
+          }
+        },
+        {
+          "name": "Consultar Status de Pagamento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/public/pagamento/status/123e4567-e89b-12d3-a456-426614174000",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "public", "pagamento", "status", "123e4567-e89b-12d3-a456-426614174000"]
+            }
+          }
+        },
+        {
+          "name": "Webhook Pagamento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pedido_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"status\": \"approved\",\n  \"external_reference\": \"MP123456789\",\n  \"payment_id\": \"123456789\",\n  \"data_processamento\": \"2024-01-15T10:30:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/public/pagamento/webhook",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "public", "pagamento", "webhook"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+} 

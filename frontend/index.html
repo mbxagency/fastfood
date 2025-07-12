@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastFood - Sistema de Autoatendimento</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-brand">
+                <i class="fas fa-hamburger"></i>
+                <span>FastFood</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#home" class="nav-link active">Início</a>
+                <a href="#menu" class="nav-link">Cardápio</a>
+                <a href="#orders" class="nav-link">Meus Pedidos</a>
+                <a href="#about" class="nav-link">Sobre</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-outline" id="loginBtn">
+                    <i class="fas fa-user"></i>
+                    Entrar
+                </button>
+                <button class="btn btn-primary" id="cartBtn">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cartCount">0</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Autoatendimento <span class="highlight">Inteligente</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Peça seus alimentos favoritos de forma rápida e prática. 
+                    Sistema moderno com arquitetura robusta e escalável.
+                </p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary btn-large" onclick="scrollToMenu()">
+                        <i class="fas fa-utensils"></i>
+                        Ver Cardápio
+                    </button>
+                    <button class="btn btn-outline btn-large" onclick="showDemo()">
+                        <i class="fas fa-play"></i>
+                        Ver Demo
+                    </button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-card">
+                    <div class="hero-card-header">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Interface Moderna</span>
+                    </div>
+                    <div class="hero-card-content">
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i>
+                            <span>FastAPI Backend</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i>
+                            <span>Arquitetura Hexagonal</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i>
+                            <span>PostgreSQL Database</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i>
+                            <span>Docker Containerized</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Menu Section -->
+        <section id="menu" class="menu-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Cardápio Digital</h2>
+                    <p>Explore nossos produtos organizados por categoria</p>
+                </div>
+                
+                <div class="menu-filters">
+                    <button class="filter-btn active" data-category="all">Todos</button>
+                    <button class="filter-btn" data-category="burgers">Hambúrgueres</button>
+                    <button class="filter-btn" data-category="drinks">Bebidas</button>
+                    <button class="filter-btn" data-category="sides">Acompanhamentos</button>
+                    <button class="filter-btn" data-category="desserts">Sobremesas</button>
+                </div>
+
+                <div class="menu-grid" id="menuGrid">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section class="architecture-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Arquitetura do Sistema</h2>
+                    <p>Estrutura robusta e escalável seguindo as melhores práticas</p>
+                </div>
+                
+                <div class="architecture-grid">
+                    <div class="arch-card">
+                        <div class="arch-icon">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <h3>Clean Architecture</h3>
+                        <p>Separação clara de responsabilidades com domínio, aplicação e infraestrutura</p>
+                    </div>
+                    
+                    <div class="arch-card">
+                        <div class="arch-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h3>PostgreSQL</h3>
+                        <p>Banco de dados relacional robusto com migrações automáticas via Alembic</p>
+                    </div>
+                    
+                    <div class="arch-card">
+                        <div class="arch-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h3>FastAPI</h3>
+                        <p>Framework moderno com documentação automática e validação de dados</p>
+                    </div>
+                    
+                    <div class="arch-card">
+                        <div class="arch-icon">
+                            <i class="fas fa-ship"></i>
+                        </div>
+                        <h3>Docker</h3>
+                        <p>Containerização para deploy consistente em qualquer ambiente</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Orders Section -->
+        <section id="orders" class="orders-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Acompanhe Seus Pedidos</h2>
+                    <p>Status em tempo real do seu pedido</p>
+                </div>
+                
+                <div class="orders-container">
+                    <div class="order-card">
+                        <div class="order-header">
+                            <h3>Pedido #12345</h3>
+                            <span class="order-status pending">Em Preparo</span>
+                        </div>
+                        <div class="order-items">
+                            <div class="order-item">
+                                <span>Hambúrguer Clássico</span>
+                                <span>R$ 15,90</span>
+                            </div>
+                            <div class="order-item">
+                                <span>Batata Frita</span>
+                                <span>R$ 8,50</span>
+                            </div>
+                            <div class="order-item">
+                                <span>Refrigerante</span>
+                                <span>R$ 5,00</span>
+                            </div>
+                        </div>
+                        <div class="order-total">
+                            <strong>Total: R$ 29,40</strong>
+                        </div>
+                        <div class="order-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 60%"></div>
+                            </div>
+                            <div class="progress-steps">
+                                <span class="step completed">Recebido</span>
+                                <span class="step completed">Confirmado</span>
+                                <span class="step active">Em Preparo</span>
+                                <span class="step">Pronto</span>
+                                <span class="step">Entregue</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Sobre o Projeto</h2>
+                    <p>Sistema completo de autoatendimento com arquitetura moderna</p>
+                </div>
+                
+                <div class="about-content">
+                    <div class="about-text">
+                        <h3>FastFood API</h3>
+                        <p>
+                            Sistema de autoatendimento desenvolvido com FastAPI e arquitetura hexagonal. 
+                            O projeto demonstra boas práticas de desenvolvimento, incluindo:
+                        </p>
+                        <ul>
+                            <li>Clean Architecture com separação de responsabilidades</li>
+                            <li>Injeção de dependências e inversão de controle</li>
+                            <li>Validação de dados com Pydantic</li>
+                            <li>Autenticação JWT</li>
+                            <li>Testes automatizados</li>
+                            <li>Containerização com Docker</li>
+                            <li>CI/CD pipeline</li>
+                        </ul>
+                    </div>
+                    <div class="about-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">99.9%</div>
+                            <div class="stat-label">Uptime</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">&lt;100ms</div>
+                            <div class="stat-label">Response Time</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">1000+</div>
+                            <div class="stat-label">Requests/min</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Seu Carrinho</h3>
+                <button class="modal-close" onclick="closeCart()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="cartItems">
+                    <!-- Cart items will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="cart-total">
+                    <strong>Total: R$ <span id="cartTotal">0,00</span></strong>
+                </div>
+                <button class="btn btn-primary" onclick="checkout()">
+                    <i class="fas fa-credit-card"></i>
+                    Finalizar Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Entrar</h3>
+                <button class="modal-close" onclick="closeLogin()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="login-form">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" placeholder="seu@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" placeholder="Sua senha" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Entrar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>FastFood API</h4>
+                    <p>Sistema de autoatendimento moderno e escalável</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Tecnologias</h4>
+                    <ul>
+                        <li>FastAPI</li>
+                        <li>PostgreSQL</li>
+                        <li>Docker</li>
+                        <li>Clean Architecture</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Links</h4>
+                    <ul>
+                        <li><a href="#home">Início</a></li>
+                        <li><a href="#menu">Cardápio</a></li>
+                        <li><a href="#orders">Pedidos</a></li>
+                        <li><a href="#about">Sobre</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FastFood API. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 
