@@ -236,10 +236,6 @@ docker build -f backend/deploy/Dockerfile -t fastfood-api:latest backend/
 4. Push para a branch (`git push origin feature/nova-funcionalidade`)
 5. Abra um Pull Request
 
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
 ## 👥 Equipe
 
 - **Desenvolvimento**: Thais Miranda, Matheus Luchiari e Murilo Biss
@@ -249,29 +245,3 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ---
 
 **🍔 FastFood - Sistema de Autoatendimento Moderno**
-
-## Ambientes e Variáveis
-
-### Backend (FastAPI)
-
-- **Local:**
-  1. Copie `backend/.env.example` para `backend/.env` e ajuste os valores conforme seu ambiente.
-  2. O Dockerfile já copia o `.env` se existir para facilitar o uso local.
-  3. No Render, configure as variáveis de ambiente pelo painel (não use `.env`).
-
-- **Render:**
-  - As variáveis são lidas do painel do Render. Não é necessário `.env`.
-
-### Frontend (Vercel ou Local)
-
-- **Local:**
-  1. Copie `frontend/.env.local.example` para `frontend/.env.local` e ajuste o valor de `VITE_API_URL`.
-  2. Rode `npm run dev` normalmente.
-
-- **Vercel:**
-  - Configure a variável `VITE_API_URL` no painel do Vercel.
-
----
-
-
-# Deploy timestamp: Sat Jul 12 14:37:40 -03 2025
