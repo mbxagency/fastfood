@@ -8,19 +8,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -r appuser && useradd -r -g appuser appuser
 
-# Instalar Poetry
-RUN pip install --no-cache-dir poetry
-
-# Configurar Poetry
-RUN poetry config virtualenvs.create false
-
 WORKDIR /app
 
 # Copiar arquivos de dependências
-COPY pyproject.toml poetry.lock* ./
+COPY requirements.txt ./
 
-# Instalar dependências
-RUN poetry install --no-dev --no-interaction --no-ansi
+# Instalar dependências Python
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copiar código da aplicação
 COPY . .
@@ -34,7 +29,7 @@ ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Expor porta (Railway usa $PORT)
+# Expor porta (Render usa $PORT)
 EXPOSE 8000
 
 # Health check
