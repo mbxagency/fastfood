@@ -1,106 +1,6 @@
 // API Configuration
 const API_BASE_URL = 'https://fastfood-api.railway.app' || 'http://localhost:8000';
 
-// Mock data for products (fallback)
-const products = [
-    {
-        id: 1,
-        name: "Hambúrguer Clássico",
-        description: "Pão, carne, alface, tomate e queijo",
-        price: 15.90,
-        category: "burgers",
-        icon: "fas fa-hamburger"
-    },
-    {
-        id: 2,
-        name: "Hambúrguer Duplo",
-        description: "Dois hambúrgueres, queijo, bacon e molho especial",
-        price: 22.50,
-        category: "burgers",
-        icon: "fas fa-hamburger"
-    },
-    {
-        id: 3,
-        name: "X-Bacon",
-        description: "Hambúrguer com bacon crocante e queijo",
-        price: 18.90,
-        category: "burgers",
-        icon: "fas fa-hamburger"
-    },
-    {
-        id: 4,
-        name: "Refrigerante",
-        description: "Coca-Cola, Pepsi ou Sprite",
-        price: 5.00,
-        category: "drinks",
-        icon: "fas fa-wine-bottle"
-    },
-    {
-        id: 5,
-        name: "Suco Natural",
-        description: "Laranja, limão ou abacaxi",
-        price: 6.50,
-        category: "drinks",
-        icon: "fas fa-wine-glass"
-    },
-    {
-        id: 6,
-        name: "Batata Frita",
-        description: "Porção de batatas fritas crocantes",
-        price: 8.50,
-        category: "sides",
-        icon: "fas fa-french-fries"
-    },
-    {
-        id: 7,
-        name: "Onion Rings",
-        description: "Anéis de cebola empanados",
-        price: 7.90,
-        category: "sides",
-        icon: "fas fa-circle"
-    },
-    {
-        id: 8,
-        name: "Sorvete",
-        description: "Sorvete de chocolate, baunilha ou morango",
-        price: 4.50,
-        category: "desserts",
-        icon: "fas fa-ice-cream"
-    },
-    {
-        id: 9,
-        name: "Pudim",
-        description: "Pudim de leite condensado",
-        price: 5.90,
-        category: "desserts",
-        icon: "fas fa-cookie-bite"
-    },
-    {
-        id: 10,
-        name: "X-Salada",
-        description: "Hambúrguer com salada completa",
-        price: 16.90,
-        category: "burgers",
-        icon: "fas fa-hamburger"
-    },
-    {
-        id: 11,
-        name: "Água",
-        description: "Água mineral com ou sem gás",
-        price: 3.50,
-        category: "drinks",
-        icon: "fas fa-tint"
-    },
-    {
-        id: 12,
-        name: "Nuggets",
-        description: "6 unidades de nuggets de frango",
-        price: 9.90,
-        category: "sides",
-        icon: "fas fa-drumstick-bite"
-    }
-];
-
 // Cart state
 let cart = [];
 let currentCategory = 'all';
@@ -118,14 +18,9 @@ const filterBtns = document.querySelectorAll('.filter-btn');
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 FastFood iniciando...');
-    loadProducts(); // Carrega dados mock primeiro
     setupEventListeners();
     updateCartDisplay();
-    
-    // Tenta carregar da API em background
-    setTimeout(() => {
-        loadProductsFromAPI();
-    }, 1000);
+    loadProductsFromAPI();
 });
 
 // Setup event listeners
@@ -192,21 +87,53 @@ function setupEventListeners() {
     }
 }
 
-// Load products from API (background)
+// Load products from API
 async function loadProductsFromAPI() {
     try {
-        console.log('🔗 Tentando carregar produtos da API...');
+        console.log('🔗 Carregando produtos da API...');
+        showLoadingState();
+        
         const response = await fetch(`${API_BASE_URL}/v1/api/public/produtos`);
         if (response.ok) {
             apiProducts = await response.json();
             console.log('✅ Produtos carregados da API:', apiProducts.length);
-            loadProducts(); // Recarrega com dados da API
+            loadProducts();
         } else {
-            console.warn('⚠️ API não disponível, usando dados mock');
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
     } catch (error) {
-        console.warn('⚠️ Erro ao carregar produtos da API:', error);
+        console.error('❌ Erro ao carregar produtos da API:', error);
+        showErrorState();
     }
+}
+
+// Show loading state
+function showLoadingState() {
+    if (!menuGrid) return;
+    
+    menuGrid.innerHTML = `
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Carregando produtos...</p>
+        </div>
+    `;
+}
+
+// Show error state
+function showErrorState() {
+    if (!menuGrid) return;
+    
+    menuGrid.innerHTML = `
+        <div class="error-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Erro ao carregar produtos</h3>
+            <p>Não foi possível carregar o cardápio. Tente novamente mais tarde.</p>
+            <button class="btn btn-primary" onclick="loadProductsFromAPI()">
+                <i class="fas fa-redo"></i>
+                Tentar Novamente
+            </button>
+        </div>
+    `;
 }
 
 // Load products
@@ -218,12 +145,33 @@ function loadProducts() {
     
     menuGrid.innerHTML = '';
     
-    const productsToShow = apiProducts.length > 0 ? apiProducts : products;
+    if (apiProducts.length === 0) {
+        menuGrid.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-utensils"></i>
+                <h3>Nenhum produto disponível</h3>
+                <p>O cardápio está vazio no momento.</p>
+            </div>
+        `;
+        return;
+    }
+    
     const filteredProducts = currentCategory === 'all' 
-        ? productsToShow 
-        : productsToShow.filter(product => product.category === currentCategory);
+        ? apiProducts 
+        : apiProducts.filter(product => product.categoria === currentCategory);
     
     console.log(`📦 Carregando ${filteredProducts.length} produtos para categoria: ${currentCategory}`);
+    
+    if (filteredProducts.length === 0) {
+        menuGrid.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-filter"></i>
+                <h3>Nenhum produto nesta categoria</h3>
+                <p>Tente selecionar outra categoria.</p>
+            </div>
+        `;
+        return;
+    }
     
     filteredProducts.forEach(product => {
         const productCard = createProductCard(product);
@@ -236,11 +184,11 @@ function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card fade-in';
     
-    // Use API data or fallback to mock data
-    const name = product.nome || product.name;
-    const description = product.descricao || product.description;
-    const price = product.preco || product.price;
-    const icon = product.icone || product.icon || 'fas fa-utensils';
+    // Use API data from Supabase
+    const name = product.nome;
+    const description = product.descricao;
+    const price = product.preco;
+    const icon = getCategoryIcon(product.categoria);
     
     card.innerHTML = `
         <div class="product-image">
@@ -262,6 +210,19 @@ function createProductCard(product) {
     return card;
 }
 
+// Get category icon based on category name
+function getCategoryIcon(category) {
+    const iconMap = {
+        'burgers': 'fas fa-hamburger',
+        'drinks': 'fas fa-wine-bottle',
+        'sides': 'fas fa-french-fries',
+        'desserts': 'fas fa-ice-cream',
+        'default': 'fas fa-utensils'
+    };
+    
+    return iconMap[category] || iconMap.default;
+}
+
 // Filter products
 function filterProducts(category) {
     currentCategory = category;
@@ -270,8 +231,12 @@ function filterProducts(category) {
 
 // Cart functions
 function addToCart(productId) {
-    const productsToUse = apiProducts.length > 0 ? apiProducts : products;
-    const product = productsToUse.find(p => p.id === productId);
+    const product = apiProducts.find(p => p.id === productId);
+    if (!product) {
+        console.error('Produto não encontrado:', productId);
+        return;
+    }
+    
     const existingItem = cart.find(item => item.id === productId);
     
     if (existingItem) {
@@ -284,7 +249,7 @@ function addToCart(productId) {
     }
     
     updateCartDisplay();
-    showNotification(`${product.nome || product.name} adicionado ao carrinho!`);
+    showNotification(`${product.nome} adicionado ao carrinho!`);
 }
 
 function removeFromCart(productId) {
@@ -322,13 +287,10 @@ function updateCartDisplay() {
                 const cartItem = document.createElement('div');
                 cartItem.className = 'cart-item';
                 
-                const name = item.nome || item.name;
-                const price = item.preco || item.price;
-                
                 cartItem.innerHTML = `
                     <div class="cart-item-info">
-                        <div class="cart-item-title">${name}</div>
-                        <div class="cart-item-price">R$ ${price.toFixed(2)}</div>
+                        <div class="cart-item-title">${item.nome}</div>
+                        <div class="cart-item-price">R$ ${item.preco.toFixed(2)}</div>
                     </div>
                     <div class="cart-item-actions">
                         <div class="cart-item-quantity">
@@ -349,8 +311,7 @@ function updateCartDisplay() {
     
     // Update total
     const total = cart.reduce((sum, item) => {
-        const price = item.preco || item.price;
-        return sum + (price * item.quantity);
+        return sum + (item.preco * item.quantity);
     }, 0);
     
     if (cartTotal) {
@@ -395,17 +356,18 @@ async function checkout() {
     }
     
     const total = cart.reduce((sum, item) => {
-        const price = item.preco || item.price;
-        return sum + (price * item.quantity);
+        return sum + (item.preco * item.quantity);
     }, 0);
     
     // Try to create order via API
     try {
+        showNotification('Processando pedido...', 'info');
+        
         const orderData = {
             items: cart.map(item => ({
                 produto_id: item.id,
                 quantidade: item.quantity,
-                preco_unitario: item.preco || item.price
+                preco_unitario: item.preco
             })),
             total: total
         };
@@ -426,9 +388,8 @@ async function checkout() {
         }
     } catch (error) {
         console.warn('Erro ao criar pedido via API:', error);
-        // Fallback to mock
-        const orderNumber = Math.floor(Math.random() * 90000) + 10000;
-        showNotification(`Pedido #${orderNumber} realizado com sucesso!`, 'success');
+        showNotification('Erro ao processar pedido. Tente novamente.', 'error');
+        return;
     }
     
     cart = [];
@@ -494,11 +455,15 @@ function showDemo() {
     
     // Simulate some demo actions
     setTimeout(() => {
-        addToCart(1); // Add hamburger
+        if (apiProducts.length > 0) {
+            addToCart(apiProducts[0].id);
+        }
     }, 500);
     
     setTimeout(() => {
-        addToCart(4); // Add drink
+        if (apiProducts.length > 1) {
+            addToCart(apiProducts[1].id);
+        }
     }, 1000);
     
     setTimeout(() => {
@@ -506,7 +471,7 @@ function showDemo() {
     }, 1500);
 }
 
-// Add CSS animations
+// Add CSS animations and states
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
@@ -533,6 +498,42 @@ style.textContent = `
     
     .notification {
         font-weight: 500;
+    }
+    
+    .loading-state, .error-state, .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6b7280;
+    }
+    
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e5e7eb;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+    
+    .error-state i, .empty-state i {
+        font-size: 3rem;
+        color: #ef4444;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state i {
+        color: #6b7280;
+    }
+    
+    .loading-state h3, .error-state h3, .empty-state h3 {
+        margin-bottom: 0.5rem;
+        color: #1f2937;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
     
     @media (max-width: 768px) {

@@ -1,6 +1,6 @@
 # 🚀 Guia de Deploy - FastFood
 
-Guia completo para fazer deploy do sistema FastFood usando Vercel (Frontend) e Railway (Backend).
+Guia completo para fazer deploy do sistema FastFood usando Vercel (Frontend).
 
 ## 📋 Arquitetura de Deploy
 
@@ -11,50 +11,8 @@ Frontend (Vercel) → Backend (Railway) → Database (Supabase)
 ## 🎯 Pré-requisitos
 
 - ✅ Conta na [Vercel](https://vercel.com)
-- ✅ Conta na [Railway](https://railway.app)
 - ✅ Conta no [Supabase](https://supabase.com) (já configurado)
 - ✅ Repositório no GitHub
-
-## 🚀 Deploy do Backend (Railway)
-
-### **1. Preparar o Backend**
-
-```bash
-# Certifique-se de que as migrações estão prontas
-cd backend
-make db-migrate
-
-# Teste a conexão com o Supabase
-make db-test
-```
-
-### **2. Deploy no Railway**
-
-1. **Acesse [Railway.app](https://railway.app)**
-2. **Clique em "New Project"**
-3. **Selecione "Deploy from GitHub repo"**
-4. **Conecte seu repositório GitHub**
-5. **Selecione o repositório `fastfood`**
-
-### **3. Configurar Variáveis de Ambiente**
-
-No Railway, vá em **Variables** e adicione:
-
-```env
-DATABASE_URL=postgresql://postgres.cpntprlstlhubeivkpzq:postech_fiap_2025@aws-0-us-east-2.pooler.supabase.com:6543/postgres
-SECRET_KEY=fastfood-secret-key-2025-change-in-production
-ENVIRONMENT=production
-DEBUG=false
-CORS_ALLOW_ORIGINS=https://fastfood.vercel.app,https://fastfood-frontend.vercel.app
-```
-
-### **4. Configurar Deploy**
-
-O Railway detectará automaticamente o `railway.json` e fará o deploy.
-
-### **5. Obter URL da API**
-
-Após o deploy, copie a URL gerada (ex: `https://fastfood-api.railway.app`)
 
 ## 🌐 Deploy do Frontend (Vercel)
 
@@ -110,13 +68,20 @@ O Railway fará health checks automáticos no endpoint `/health`.
 
 ### **Logs e Monitoramento**
 
-- **Railway**: Logs automáticos no dashboard
 - **Vercel**: Analytics e logs no dashboard
 - **Supabase**: Logs no dashboard do projeto
 
 ## 🧪 Testando o Deploy
 
-### **1. Testar API**
+### **1. Testar Frontend**
+
+Acesse a URL do Vercel e teste:
+- ✅ Navegação
+- ✅ Carregamento de produtos
+- ✅ Carrinho de compras
+- ✅ Checkout
+
+### **2. Testar API**
 
 ```bash
 # Teste o health check
@@ -126,14 +91,6 @@ curl https://fastfood-api.railway.app/health
 curl https://fastfood-api.railway.app/v1/api/public/produtos
 ```
 
-### **2. Testar Frontend**
-
-Acesse a URL do Vercel e teste:
-- ✅ Navegação
-- ✅ Carregamento de produtos
-- ✅ Carrinho de compras
-- ✅ Checkout
-
 ## 🔄 Deploy Automático
 
 ### **GitHub Actions (Opcional)**
@@ -141,23 +98,14 @@ Acesse a URL do Vercel e teste:
 Crie `.github/workflows/deploy.yml`:
 
 ```yaml
-name: Deploy
+name: Deploy to Vercel
 
 on:
   push:
     branches: [main]
 
 jobs:
-  deploy-backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Deploy to Railway
-        uses: railway/deploy@v1
-        with:
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
-
-  deploy-frontend:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -170,11 +118,6 @@ jobs:
 ```
 
 ## 📊 Monitoramento
-
-### **Railway Dashboard**
-- Uptime e performance
-- Logs em tempo real
-- Métricas de uso
 
 ### **Vercel Dashboard**
 - Analytics de visitantes
@@ -193,28 +136,23 @@ jobs:
 1. **CORS Errors**
    - Verifique se a URL do frontend está em `CORS_ALLOW_ORIGINS`
 
-2. **Database Connection**
-   - Teste a conexão com `make db-test`
-   - Verifique as variáveis de ambiente
+2. **API Connection**
+   - Verifique se a variável `API_URL` está configurada corretamente
+   - Teste a API diretamente
 
 3. **Build Failures**
-   - Verifique os logs no Railway/Vercel
+   - Verifique os logs no Vercel
    - Teste localmente primeiro
 
 ### **Comandos Úteis**
 
 ```bash
-# Testar conexão com banco
-make db-test
-
-# Executar migrações
-make db-migrate
-
-# Testar API localmente
-make dev
+# Testar frontend localmente
+cd frontend
+python -m http.server 3000
 
 # Verificar logs
-railway logs
+vercel logs
 ```
 
 ## 🎉 URLs Finais

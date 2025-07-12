@@ -28,7 +28,6 @@
 
 ### **🚀 Deploy**
 - ✅ Configuração Vercel (Frontend)
-- ✅ Configuração Railway (Backend)
 - ✅ Docker containerizado
 - ✅ Scripts de automação
 - ✅ Variáveis de ambiente
@@ -140,8 +139,8 @@ make lint             # Verificar código
 ## 📞 **Contatos**
 
 - **Desenvolvedor**: [Seu Nome]
-- **Repositório**: [GitHub](https://github.com/seu-usuario/fastfood)
-- **Issues**: [GitHub Issues](https://github.com/seu-usuario/fastfood/issues)
+- **Repositório**: [GitHub](https://github.com/mbxagency/fastfood)
+- **Issues**: [GitHub Issues](https://github.com/mbxagency/fastfood/issues)
 
 ---
 

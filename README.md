@@ -94,7 +94,6 @@ fastfood/
 ├── 📁 k8s/                     # Kubernetes (opcional)
 ├── 📁 scripts/                 # Scripts de automação
 ├── 🚀 DEPLOY_GUIDE.md          # Guia de deploy
-├── 🐳 railway.json             # Config Railway
 ├── 🌐 vercel.json              # Config Vercel
 └── 📖 README.md                # Este arquivo
 ```
@@ -104,7 +103,7 @@ fastfood/
 ### **1. Pré-requisitos**
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/fastfood.git
+git clone https://github.com/mbxagency/fastfood.git
 cd fastfood
 
 # Execute o script de deploy
@@ -112,12 +111,6 @@ cd fastfood
 ```
 
 ### **2. Deploy Manual**
-
-#### **Backend (Railway)**
-1. Acesse [Railway.app](https://railway.app)
-2. New Project → Deploy from GitHub
-3. Configure variáveis de ambiente
-4. Deploy automático
 
 #### **Frontend (Vercel)**
 1. Acesse [Vercel.com](https://vercel.com)
@@ -128,39 +121,12 @@ cd fastfood
 
 ### **3. Variáveis de Ambiente**
 
-#### **Railway (Backend)**
-```env
-DATABASE_URL=postgresql://user:pass@host:port/db
-SECRET_KEY=your-secret-key
-ENVIRONMENT=production
-DEBUG=false
-CORS_ALLOW_ORIGINS=https://your-domain.vercel.app
-```
-
 #### **Vercel (Frontend)**
 ```env
-API_URL=https://your-api.railway.app
+API_URL=https://fastfood-api.railway.app
 ```
 
 ## 🧪 Desenvolvimento Local
-
-### **Backend**
-```bash
-cd backend
-
-# Instalar dependências
-poetry install
-
-# Configurar ambiente
-cp env.example .env
-# Edite .env com suas configurações
-
-# Executar migrações
-make db-migrate
-
-# Iniciar servidor
-make dev
-```
 
 ### **Frontend**
 ```bash
@@ -189,28 +155,18 @@ npx serve .
 ## 🔧 Comandos Úteis
 
 ```bash
-# Testar conexão com banco
-make db-test
-
-# Executar migrações
-make db-migrate
-
-# Popular banco com dados
-make db-seed
-
-# Executar testes
-make test
+# Deploy completo
+./scripts/deploy.sh
 
 # Verificar qualidade do código
 make lint
 
-# Deploy completo
-./scripts/deploy.sh
+# Testar API localmente
+make dev
 ```
 
 ## 📈 Monitoramento
 
-- **Railway**: Logs e métricas do backend
 - **Vercel**: Analytics e performance do frontend
 - **Supabase**: Queries e storage do banco
 
@@ -230,11 +186,11 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 - **Desenvolvimento**: [Seu Nome]
 - **Arquitetura**: Clean Architecture + Hexagonal
-- **Deploy**: Vercel + Railway + Supabase
+- **Deploy**: Vercel + Supabase
 
 ## 📞 Suporte
 
-- **Issues**: [GitHub Issues](https://github.com/seu-usuario/fastfood/issues)
+- **Issues**: [GitHub Issues](https://github.com/mbxagency/fastfood/issues)
 - **Documentação**: [docs/](docs/)
 - **API Docs**: [https://fastfood-api.railway.app/docs](https://fastfood-api.railway.app/docs)
 
