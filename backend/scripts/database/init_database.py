@@ -72,25 +72,56 @@ def populate_products():
             
         engine = create_engine(database_url)
         
-        # SQL para inserir produtos (usando tb_produtos e apenas colunas existentes)
-        produtos_sql = """
-        INSERT INTO tb_produtos (nome, categoria, preco) VALUES
-        ('Hambúrguer Clássico', 'burgers', 15.90),
-        ('Hambúrguer Duplo', 'burgers', 22.50),
-        ('X-Bacon', 'burgers', 18.90),
-        ('X-Salada', 'burgers', 16.90),
-        ('X-Frango', 'burgers', 17.90),
-        ('Refrigerante Cola', 'drinks', 5.00),
-        ('Suco Natural', 'drinks', 6.50),
-        ('Água Mineral', 'drinks', 3.50),
-        ('Batata Frita', 'sides', 8.50),
-        ('Onion Rings', 'sides', 7.90),
-        ('Nuggets', 'sides', 9.90),
-        ('Sorvete de Chocolate', 'desserts', 4.50),
-        ('Pudim', 'desserts', 5.90),
-        ('Milk Shake', 'desserts', 12.90)
-        ON CONFLICT (nome) DO NOTHING;
-        """
+        # Verificar se a constraint única existe
+        with engine.connect() as conn:
+            result = conn.execute(text("""
+                SELECT COUNT(*) FROM information_schema.table_constraints 
+                WHERE table_name = 'tb_produtos' 
+                AND constraint_name = 'uq_produto_nome' 
+                AND constraint_type = 'UNIQUE'
+            """))
+            has_unique_constraint = result.scalar() > 0
+        
+        # SQL para inserir produtos (com ou sem ON CONFLICT baseado na constraint)
+        if has_unique_constraint:
+            print("✅ Constraint única encontrada, usando ON CONFLICT")
+            produtos_sql = """
+            INSERT INTO tb_produtos (nome, categoria, preco) VALUES
+            ('Hambúrguer Clássico', 'burgers', 15.90),
+            ('Hambúrguer Duplo', 'burgers', 22.50),
+            ('X-Bacon', 'burgers', 18.90),
+            ('X-Salada', 'burgers', 16.90),
+            ('X-Frango', 'burgers', 17.90),
+            ('Refrigerante Cola', 'drinks', 5.00),
+            ('Suco Natural', 'drinks', 6.50),
+            ('Água Mineral', 'drinks', 3.50),
+            ('Batata Frita', 'sides', 8.50),
+            ('Onion Rings', 'sides', 7.90),
+            ('Nuggets', 'sides', 9.90),
+            ('Sorvete de Chocolate', 'desserts', 4.50),
+            ('Pudim', 'desserts', 5.90),
+            ('Milk Shake', 'desserts', 12.90)
+            ON CONFLICT (nome) DO NOTHING;
+            """
+        else:
+            print("⚠️ Constraint única não encontrada, inserindo sem ON CONFLICT")
+            produtos_sql = """
+            INSERT INTO tb_produtos (nome, categoria, preco) VALUES
+            ('Hambúrguer Clássico', 'burgers', 15.90),
+            ('Hambúrguer Duplo', 'burgers', 22.50),
+            ('X-Bacon', 'burgers', 18.90),
+            ('X-Salada', 'burgers', 16.90),
+            ('X-Frango', 'burgers', 17.90),
+            ('Refrigerante Cola', 'drinks', 5.00),
+            ('Suco Natural', 'drinks', 6.50),
+            ('Água Mineral', 'drinks', 3.50),
+            ('Batata Frita', 'sides', 8.50),
+            ('Onion Rings', 'sides', 7.90),
+            ('Nuggets', 'sides', 9.90),
+            ('Sorvete de Chocolate', 'desserts', 4.50),
+            ('Pudim', 'desserts', 5.90),
+            ('Milk Shake', 'desserts', 12.90);
+            """
         
         with engine.connect() as conn:
             conn.execute(text(produtos_sql))
