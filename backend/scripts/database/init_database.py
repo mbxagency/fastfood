@@ -88,8 +88,7 @@ def populate_products():
         ('Nuggets', 'sides', 9.90),
         ('Sorvete de Chocolate', 'desserts', 4.50),
         ('Pudim', 'desserts', 5.90),
-        ('Milk Shake', 'desserts', 12.90)
-        ON CONFLICT (nome) DO NOTHING;
+        ('Milk Shake', 'desserts', 12.90);
         """
         
         with engine.connect() as conn:
