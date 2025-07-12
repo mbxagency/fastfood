@@ -389,38 +389,5 @@
 
     <!-- JavaScript -->
     <script src="assets/js/script.js"></script>
-    
-    <!-- Fallback: Hide loading screen and ensure page loads -->
-    <script>
-        // Emergency fallback to hide loading screen and show content
-        document.addEventListener('DOMContentLoaded', function() {
-            // Hide loading screen immediately
-            const loadingScreen = document.getElementById('loadingScreen');
-            if (loadingScreen) {
-                loadingScreen.style.display = 'none';
-                loadingScreen.classList.add('hidden');
-            }
-            
-            // Ensure main content is visible
-            const mainContent = document.querySelector('body');
-            if (mainContent) {
-                mainContent.style.visibility = 'visible';
-                mainContent.style.opacity = '1';
-            }
-        });
-        
-        // Fallback timeout
-        setTimeout(() => {
-            const loadingScreen = document.getElementById('loadingScreen');
-            if (loadingScreen) {
-                loadingScreen.style.display = 'none';
-                loadingScreen.classList.add('hidden');
-            }
-            
-            // Force show all content
-            document.body.style.visibility = 'visible';
-            document.body.style.opacity = '1';
-        }, 1000);
-    </script>
 </body>
 </html> 

@@ -437,6 +437,43 @@ body {
     color: var(--white);
 }
 
+/* Admin link button styling */
+.admin-link {
+    font-family: var(--font-family) !important;
+    font-size: 1rem !important;
+    font-weight: var(--font-medium) !important;
+    color: var(--dark-red) !important;
+    text-decoration: none !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: color var(--transition-fast) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.admin-link:hover {
+    color: var(--white) !important;
+}
+
+.footer-link {
+    font-family: var(--font-family) !important;
+    font-size: 1rem !important;
+    font-weight: var(--font-medium) !important;
+    color: var(--white) !important;
+    text-decoration: none !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: color var(--transition-fast) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.footer-link:hover {
+    color: var(--primary-yellow) !important;
+}
+
 .nav-toggle {
     display: none;
     background: none;

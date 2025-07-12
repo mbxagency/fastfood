@@ -503,14 +503,29 @@ const Products = {
         try {
             console.log('🔄 Carregando produtos do backend...');
             
-            // Add timeout to the fetch request
+            // Check cache first
+            const cachedProducts = localStorage.getItem('cachedProducts');
+            const cacheTimestamp = localStorage.getItem('productsCacheTimestamp');
+            const now = Date.now();
+            
+            // Use cache if it's less than 5 minutes old
+            if (cachedProducts && cacheTimestamp && (now - parseInt(cacheTimestamp)) < 300000) {
+                const products = JSON.parse(cachedProducts);
+                console.log('📦 Produtos carregados do cache:', products);
+                STATE.products = products;
+                this.renderProducts(products);
+                return;
+            }
+            
+            // Add timeout to the fetch request (reduced to 3 seconds)
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
             
             const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.PRODUCTS}`, {
                 signal: controller.signal,
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache'
                 }
             });
             
@@ -521,11 +536,15 @@ const Products = {
             }
             
             const products = await response.json();
-            console.log('📦 Produtos carregados:', products);
+            console.log('📦 Produtos carregados do backend:', products);
             
             if (!products || products.length === 0) {
                 throw new Error('Nenhum produto encontrado no backend');
             }
+            
+            // Cache the products
+            localStorage.setItem('cachedProducts', JSON.stringify(products));
+            localStorage.setItem('productsCacheTimestamp', now.toString());
             
             STATE.products = products;
             this.renderProducts(products);
@@ -534,8 +553,19 @@ const Products = {
         } catch (error) {
             console.error('❌ Erro ao carregar produtos:', error);
             
+            // Try to use cached data if available, even if expired
+            const cachedProducts = localStorage.getItem('cachedProducts');
+            if (cachedProducts) {
+                console.log('📦 Usando produtos do cache (expirado):', cachedProducts);
+                const products = JSON.parse(cachedProducts);
+                STATE.products = products;
+                this.renderProducts(products);
+                Utils.showNotification('Produtos carregados do cache (offline)', 'info');
+                return;
+            }
+            
             if (error.name === 'AbortError') {
-                Utils.showNotification('Timeout ao carregar produtos', 'error');
+                Utils.showNotification('Timeout ao carregar produtos (3s)', 'error');
             } else {
                 Utils.showNotification('Erro ao carregar produtos do backend', 'error');
             }
@@ -548,9 +578,14 @@ const Products = {
                         <i class="fas fa-exclamation-triangle"></i>
                         <h3>Erro ao carregar produtos</h3>
                         <p>Não foi possível conectar com o backend.</p>
-                        <button class="btn btn-primary" onclick="Products.loadProducts()">
-                            <i class="fas fa-refresh"></i> Tentar Novamente
-                        </button>
+                        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+                            <button class="btn btn-primary" onclick="Products.loadProducts()">
+                                <i class="fas fa-refresh"></i> Tentar Novamente
+                            </button>
+                            <button class="btn btn-secondary" onclick="Products.forceRefresh()">
+                                <i class="fas fa-sync"></i> Forçar Atualização
+                            </button>
+                        </div>
                     </div>
                 `;
             }
@@ -595,6 +630,17 @@ const Products = {
             : STATE.products.filter(product => product.categoria === category);
         
         this.renderProducts(products);
+    },
+
+    clearCache() {
+        localStorage.removeItem('cachedProducts');
+        localStorage.removeItem('productsCacheTimestamp');
+        console.log('🗑️ Cache de produtos limpo');
+    },
+
+    forceRefresh() {
+        this.clearCache();
+        return this.loadProducts();
     }
 };
 
@@ -766,14 +812,18 @@ const Forms = {
 // ===== LOADING SCREEN =====
 const LoadingScreen = {
     init() {
-        // Force hide loading screen immediately
-        this.hide();
+        // Show loading screen for 2 seconds
+        this.show();
+        setTimeout(() => {
+            this.hide();
+        }, 2000);
     },
 
     show() {
         const loadingScreen = document.getElementById('loadingScreen');
         if (loadingScreen) {
             loadingScreen.classList.remove('hidden');
+            loadingScreen.style.display = 'flex';
         }
     },
 
@@ -791,8 +841,8 @@ const LoadingScreen = {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🍔 BurgerHouse - Inicializando...');
     
-    // Force hide loading screen first
-    LoadingScreen.hide();
+    // Initialize loading screen with 2 second delay
+    LoadingScreen.init();
     
     // Initialize all modules
     try {
@@ -805,13 +855,11 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Erro ao inicializar módulos:', error);
     }
     
-    // Load products in background (non-blocking)
-    setTimeout(() => {
-        Products.loadProducts().catch(error => {
-            console.error('❌ Erro ao carregar produtos:', error);
-            Utils.showNotification('Erro ao carregar produtos do backend', 'error');
-        });
-    }, 500);
+    // Load products immediately (will use cache if available)
+    Products.loadProducts().catch(error => {
+        console.error('❌ Erro ao carregar produtos:', error);
+        Utils.showNotification('Erro ao carregar produtos do backend', 'error');
+    });
     
     console.log('✅ BurgerHouse - Inicializado com sucesso!');
 });
