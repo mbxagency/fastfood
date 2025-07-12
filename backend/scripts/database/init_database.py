@@ -72,23 +72,23 @@ def populate_products():
             
         engine = create_engine(database_url)
         
-        # SQL para inserir produtos
+        # SQL para inserir produtos (usando tb_produtos e apenas colunas existentes)
         produtos_sql = """
-        INSERT INTO produtos (nome, descricao, preco, categoria, disponivel) VALUES
-        ('Hambúrguer Clássico', 'Pão, carne, alface, tomate e queijo', 15.90, 'burgers', true),
-        ('Hambúrguer Duplo', 'Dois hambúrgueres, queijo, bacon e molho especial', 22.50, 'burgers', true),
-        ('X-Bacon', 'Hambúrguer com bacon crocante e queijo', 18.90, 'burgers', true),
-        ('X-Salada', 'Hambúrguer com salada completa', 16.90, 'burgers', true),
-        ('X-Frango', 'Filé de frango grelhado com queijo e salada', 17.90, 'burgers', true),
-        ('Refrigerante Cola', 'Coca-Cola 350ml gelado', 5.00, 'drinks', true),
-        ('Suco Natural', 'Suco natural de laranja 300ml', 6.50, 'drinks', true),
-        ('Água Mineral', 'Água mineral 500ml', 3.50, 'drinks', true),
-        ('Batata Frita', 'Porção de batatas fritas crocantes', 8.50, 'sides', true),
-        ('Onion Rings', 'Anéis de cebola empanados', 7.90, 'sides', true),
-        ('Nuggets', '6 unidades de nuggets de frango', 9.90, 'sides', true),
-        ('Sorvete de Chocolate', 'Sorvete cremoso de chocolate com calda', 4.50, 'desserts', true),
-        ('Pudim', 'Pudim de leite condensado', 5.90, 'desserts', true),
-        ('Milk Shake', 'Milk shake de baunilha com chantilly', 12.90, 'desserts', true)
+        INSERT INTO tb_produtos (nome, categoria, preco) VALUES
+        ('Hambúrguer Clássico', 'burgers', 15.90),
+        ('Hambúrguer Duplo', 'burgers', 22.50),
+        ('X-Bacon', 'burgers', 18.90),
+        ('X-Salada', 'burgers', 16.90),
+        ('X-Frango', 'burgers', 17.90),
+        ('Refrigerante Cola', 'drinks', 5.00),
+        ('Suco Natural', 'drinks', 6.50),
+        ('Água Mineral', 'drinks', 3.50),
+        ('Batata Frita', 'sides', 8.50),
+        ('Onion Rings', 'sides', 7.90),
+        ('Nuggets', 'sides', 9.90),
+        ('Sorvete de Chocolate', 'desserts', 4.50),
+        ('Pudim', 'desserts', 5.90),
+        ('Milk Shake', 'desserts', 12.90)
         ON CONFLICT (nome) DO NOTHING;
         """
         
@@ -98,7 +98,7 @@ def populate_products():
         
         # Verify insertion
         with engine.connect() as conn:
-            result = conn.execute(text("SELECT COUNT(*) FROM produtos"))
+            result = conn.execute(text("SELECT COUNT(*) FROM tb_produtos"))
             count = result.scalar()
             print(f"✅ {count} produtos inseridos com sucesso!")
         
@@ -120,8 +120,8 @@ def verify_database():
         engine = create_engine(database_url)
         
         with engine.connect() as conn:
-            # Check tables
-            tables = ['produtos', 'categorias', 'clientes', 'pedidos', 'pagamentos']
+            # Check tables (usando nomes corretos com prefixo tb_)
+            tables = ['tb_produtos', 'tb_categorias', 'tb_clientes', 'tb_pedidos', 'tb_pagamentos']
             for table in tables:
                 try:
                     result = conn.execute(text(f"SELECT COUNT(*) FROM {table}"))
