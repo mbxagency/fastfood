@@ -1,42 +1,39 @@
-from pydantic_settings import BaseSettings
-from typing import List
 import os
+from typing import List
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # API
-    API_TITLE: str = "Postech Fast Food API"
-    API_DESCRIPTION: str = "API para sistema de autoatendimento de fast food"
-    API_VERSION: str = "2.0.0"
-    
-    # CORS
-    CORS_ALLOW_ORIGINS: List[str] = ["*"]
-    CORS_ALLOW_CREDENTIALS: bool = True
-    CORS_ALLOW_METHODS: List[str] = ["*"]
-    CORS_ALLOW_HEADERS: List[str] = ["*"]
-    
-    # Database - Supabase
-    DATABASE_URL: str = "postgresql://postgres.cpntprlstlhubeivkpzq:postech_fiap_2025@aws-0-us-east-2.pooler.supabase.com:6543/postgres"
+    # Database
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/fastfood")
     
     # Security
-    SECRET_KEY: str = "fastfood-secret-key-2025-change-in-production"
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "fastfood-secret-key-change-in-production")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # Environment
-    ENVIRONMENT: str = "development"
-    DEBUG: bool = True
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+    DEBUG: bool = os.getenv("DEBUG", "true").lower() == "true"
+    
+    # CORS
+    CORS_ALLOW_ORIGINS: List[str] = os.getenv("CORS_ALLOW_ORIGINS", "http://localhost:3000").split(",")
+    CORS_ALLOW_CREDENTIALS: bool = True
+    CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE"]
+    CORS_ALLOW_HEADERS: List[str] = ["*"]
+    
+    # API
+    API_TITLE: str = "FastFood API"
+    API_DESCRIPTION: str = "API para sistema de autoatendimento de fast food"
+    API_VERSION: str = "1.0.0"
+    
+    # Logging
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     
     class Config:
         env_file = ".env"
+        case_sensitive = False
 
 
-# Override settings for production
-if os.getenv("ENVIRONMENT") == "production":
-    settings = Settings(
-        CORS_ALLOW_ORIGINS=["https://fastfood.vercel.app", "https://fastfood-frontend.vercel.app"],
-        DEBUG=False,
-        ENVIRONMENT="production"
-    )
-else:
-    settings = Settings() 
+# Create settings instance
+settings = Settings() 

@@ -1,38 +1,70 @@
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from src.infrastructure.db.models.produto_model import ProdutoModel
+from pathlib import Path
 
-# Usar DATABASE_URL do ambiente
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/tech_challenge")
+# Add the src directory to the Python path
+sys.path.append(str(Path(__file__).parent.parent / "src"))
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-produtos = [
-    {"nome": "X-Burguer", "categoria": "Lanche", "preco": 15.90},
-    {"nome": "X-Salada", "categoria": "Lanche", "preco": 16.90},
-    {"nome": "Batata Frita", "categoria": "Acompanhamento", "preco": 9.90},
-    {"nome": "Refrigerante", "categoria": "Bebida", "preco": 6.00},
-    {"nome": "Suco Natural", "categoria": "Bebida", "preco": 7.50},
-    {"nome": "Sorvete", "categoria": "Sobremesa", "preco": 8.00},
-]
+from sqlalchemy import create_engine, text
+from src.config import settings
 
 def popular_produtos():
-    session = SessionLocal()
+    """Popula a tabela de produtos com dados iniciais"""
+    
+    # Use settings for database connection
+    DATABASE_URL = settings.DATABASE_URL
+    
     try:
-        for p in produtos:
-            produto = ProdutoModel(nome=p["nome"], categoria=p["categoria"], preco=p["preco"])
-            session.add(produto)
-        session.commit()
-        print("Produtos inseridos com sucesso.")
+        # Create engine
+        engine = create_engine(DATABASE_URL)
+        
+        # Test connection
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT 1"))
+            print("✅ Conexão com banco estabelecida")
+        
+        # SQL para inserir produtos
+        produtos_sql = """
+        INSERT INTO produtos (nome, descricao, preco, categoria, disponivel) VALUES
+        ('Hambúrguer Clássico', 'Pão, carne, alface, tomate e queijo', 15.90, 'burgers', true),
+        ('Hambúrguer Duplo', 'Dois hambúrgueres, queijo, bacon e molho especial', 22.50, 'burgers', true),
+        ('X-Bacon', 'Hambúrguer com bacon crocante e queijo', 18.90, 'burgers', true),
+        ('X-Salada', 'Hambúrguer com salada completa', 16.90, 'burgers', true),
+        ('Refrigerante', 'Coca-Cola, Pepsi ou Sprite', 5.00, 'drinks', true),
+        ('Suco Natural', 'Laranja, limão ou abacaxi', 6.50, 'drinks', true),
+        ('Água', 'Água mineral com ou sem gás', 3.50, 'drinks', true),
+        ('Batata Frita', 'Porção de batatas fritas crocantes', 8.50, 'sides', true),
+        ('Onion Rings', 'Anéis de cebola empanados', 7.90, 'sides', true),
+        ('Nuggets', '6 unidades de nuggets de frango', 9.90, 'sides', true),
+        ('Sorvete', 'Sorvete de chocolate, baunilha ou morango', 4.50, 'desserts', true),
+        ('Pudim', 'Pudim de leite condensado', 5.90, 'desserts', true)
+        ON CONFLICT (nome) DO NOTHING;
+        """
+        
+        # Execute insert
+        with engine.connect() as conn:
+            conn.execute(text(produtos_sql))
+            conn.commit()
+            print("✅ Produtos inseridos com sucesso!")
+        
+        # Verify insertion
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT COUNT(*) FROM produtos"))
+            count = result.scalar()
+            print(f"📊 Total de produtos na tabela: {count}")
+            
     except Exception as e:
-        session.rollback()
-        print("Erro ao inserir produtos:", e)
-    finally:
-        session.close()
+        print(f"❌ Erro ao popular produtos: {e}")
+        return False
+    
+    return True
 
 if __name__ == "__main__":
-    popular_produtos()
+    print("🚀 Iniciando população da tabela produtos...")
+    success = popular_produtos()
+    
+    if success:
+        print("🎉 População concluída com sucesso!")
+    else:
+        print("💥 Falha na população da tabela")
+        sys.exit(1)

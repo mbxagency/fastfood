@@ -1,18 +1,66 @@
 # 🚀 Guia de Deploy - FastFood
 
-Guia completo para fazer deploy do sistema FastFood usando Vercel (Frontend).
+Guia completo para fazer deploy do sistema FastFood usando Vercel (Frontend) e Render (Backend).
 
 ## 📋 Arquitetura de Deploy
 
 ```
-Frontend (Vercel) → Backend (Railway) → Database (Supabase)
+Frontend (Vercel) → Backend (Render) → Database (Supabase)
 ```
 
 ## 🎯 Pré-requisitos
 
 - ✅ Conta na [Vercel](https://vercel.com)
+- ✅ Conta no [Render](https://render.com)
 - ✅ Conta no [Supabase](https://supabase.com) (já configurado)
 - ✅ Repositório no GitHub
+
+## 🚀 Deploy do Backend (Render)
+
+### **1. Preparar o Backend**
+
+```bash
+# Certifique-se de que o backend está na pasta correta
+ls backend/
+# Deve mostrar: src/, alembic/, requirements.txt, render.yaml, etc.
+```
+
+### **2. Deploy no Render**
+
+1. **Acesse [Render.com](https://render.com)**
+2. **Clique em "New +" → "Web Service"**
+3. **Conecte seu repositório GitHub**
+4. **Selecione o repositório `fastfood`**
+
+### **3. Configurar Build**
+
+No Render, configure:
+
+- **Name**: `fastfood-api`
+- **Environment**: `Python 3`
+- **Build Command**: `cd backend && pip install -r requirements.txt && alembic upgrade head`
+- **Start Command**: `cd backend && uvicorn src.main:app --host 0.0.0.0 --port $PORT`
+- **Plan**: Free
+
+### **4. Configurar Variáveis de Ambiente**
+
+No Render, vá em **Environment** e adicione:
+
+```env
+DATABASE_URL=postgresql://postgres.cpntprlstlhubeivkpzq:postech_fiap_2025@aws-0-us-east-2.pooler.supabase.com:6543/postgres
+SECRET_KEY=fastfood-secret-key-2025-change-in-production
+ENVIRONMENT=production
+DEBUG=false
+CORS_ALLOW_ORIGINS=https://fastfood.vercel.app
+API_PREFIX=/v1
+PROJECT_NAME=FastFood API
+VERSION=1.0.0
+LOG_LEVEL=INFO
+```
+
+### **5. Deploy**
+
+Clique em **Create Web Service** e aguarde a conclusão.
 
 ## 🌐 Deploy do Frontend (Vercel)
 
@@ -45,7 +93,7 @@ No Vercel, configure:
 No Vercel, vá em **Environment Variables** e adicione:
 
 ```env
-API_URL=https://fastfood-api.railway.app
+API_URL=https://fastfood-api.onrender.com
 ```
 
 ### **5. Deploy**
@@ -64,32 +112,33 @@ CORS_ALLOW_ORIGINS=["https://seu-dominio.vercel.app"]
 
 ### **Health Check**
 
-O Railway fará health checks automáticos no endpoint `/health`.
+O Render fará health checks automáticos no endpoint `/health`.
 
 ### **Logs e Monitoramento**
 
 - **Vercel**: Analytics e logs no dashboard
+- **Render**: Logs no dashboard do projeto
 - **Supabase**: Logs no dashboard do projeto
 
 ## 🧪 Testando o Deploy
 
-### **1. Testar Frontend**
+### **1. Testar Backend**
+
+```bash
+# Teste o health check
+curl https://fastfood-api.onrender.com/health
+
+# Teste os produtos
+curl https://fastfood-api.onrender.com/v1/api/public/produtos
+```
+
+### **2. Testar Frontend**
 
 Acesse a URL do Vercel e teste:
 - ✅ Navegação
 - ✅ Carregamento de produtos
 - ✅ Carrinho de compras
 - ✅ Checkout
-
-### **2. Testar API**
-
-```bash
-# Teste o health check
-curl https://fastfood-api.railway.app/health
-
-# Teste os produtos
-curl https://fastfood-api.railway.app/v1/api/public/produtos
-```
 
 ## 🔄 Deploy Automático
 
@@ -98,7 +147,7 @@ curl https://fastfood-api.railway.app/v1/api/public/produtos
 Crie `.github/workflows/deploy.yml`:
 
 ```yaml
-name: Deploy to Vercel
+name: Deploy to Render
 
 on:
   push:
@@ -109,12 +158,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v20
+      - name: Deploy to Render
+        uses: johnbeynon/render-deploy-action@v1.0.0
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.ORG_ID }}
-          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          service-id: ${{ secrets.RENDER_SERVICE_ID }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
 ```
 
 ## 📊 Monitoramento
@@ -123,6 +171,11 @@ jobs:
 - Analytics de visitantes
 - Performance do frontend
 - Deploy history
+
+### **Render Dashboard**
+- Logs em tempo real
+- Métricas de performance
+- Uptime monitoring
 
 ### **Supabase Dashboard**
 - Queries e performance
@@ -136,23 +189,27 @@ jobs:
 1. **CORS Errors**
    - Verifique se a URL do frontend está em `CORS_ALLOW_ORIGINS`
 
-2. **API Connection**
-   - Verifique se a variável `API_URL` está configurada corretamente
-   - Teste a API diretamente
+2. **Database Connection**
+   - Verifique se a variável `DATABASE_URL` está configurada corretamente
+   - Teste a conexão com o Supabase
 
 3. **Build Failures**
-   - Verifique os logs no Vercel
+   - Verifique os logs no Render
    - Teste localmente primeiro
 
 ### **Comandos Úteis**
 
 ```bash
+# Testar backend localmente
+cd backend
+python -m uvicorn src.main:app --reload
+
 # Testar frontend localmente
 cd frontend
 python -m http.server 3000
 
 # Verificar logs
-vercel logs
+render logs
 ```
 
 ## 🎉 URLs Finais
@@ -160,9 +217,9 @@ vercel logs
 Após o deploy, você terá:
 
 - **Frontend**: `https://fastfood.vercel.app`
-- **Backend**: `https://fastfood-api.railway.app`
+- **Backend**: `https://fastfood-api.onrender.com`
 - **Database**: Supabase (já configurado)
-- **Docs**: `https://fastfood-api.railway.app/docs`
+- **Docs**: `https://fastfood-api.onrender.com/docs`
 
 ## 📈 Próximos Passos
 

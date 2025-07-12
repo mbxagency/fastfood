@@ -28,6 +28,7 @@
 
 ### **🚀 Deploy**
 - ✅ Configuração Vercel (Frontend)
+- ✅ Configuração Render (Backend)
 - ✅ Docker containerizado
 - ✅ Scripts de automação
 - ✅ Variáveis de ambiente
@@ -89,7 +90,7 @@
 - **Host**: Vercel
 
 ### **Infrastructure**
-- **Backend Host**: Railway
+- **Backend Host**: Render
 - **Database**: Supabase
 - **CI/CD**: GitHub Actions (opcional)
 
@@ -104,15 +105,15 @@
 ### **Funcionalidades**
 - **Endpoints API**: 15+
 - **Páginas Frontend**: 6 seções
-- **Integrações**: 3 (Vercel, Railway, Supabase)
+- **Integrações**: 3 (Vercel, Render, Supabase)
 
 ## 🎉 **Deploy Status**
 
 ### **Ambiente de Produção**
 - ✅ **Frontend**: https://fastfood.vercel.app
-- ✅ **Backend**: https://fastfood-api.railway.app
+- ✅ **Backend**: https://fastfood-api.onrender.com
 - ✅ **Database**: Supabase PostgreSQL
-- ✅ **Docs**: https://fastfood-api.railway.app/docs
+- ✅ **Docs**: https://fastfood-api.onrender.com/docs
 
 ### **Ambiente de Desenvolvimento**
 - ✅ **Local**: http://localhost:8000

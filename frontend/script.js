@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = 'https://fastfood-api.railway.app' || 'http://localhost:8000';
+const API_BASE_URL = 'https://fastfood-api.onrender.com' || 'http://localhost:8000';
 
 // Cart state
 let cart = [];

@@ -5,8 +5,8 @@ Sistema completo de autoatendimento para restaurantes fast food, desenvolvido co
 ## 🚀 Demo
 
 - **Frontend**: [https://fastfood.vercel.app](https://fastfood.vercel.app)
-- **API Docs**: [https://fastfood-api.railway.app/docs](https://fastfood-api.railway.app/docs)
-- **Health Check**: [https://fastfood-api.railway.app/health](https://fastfood-api.railway.app/health)
+- **API Docs**: [https://fastfood-api.onrender.com/docs](https://fastfood-api.onrender.com/docs)
+- **Health Check**: [https://fastfood-api.onrender.com/health](https://fastfood-api.onrender.com/health)
 
 ## 📋 Funcionalidades
 
@@ -29,7 +29,7 @@ Sistema completo de autoatendimento para restaurantes fast food, desenvolvido co
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │    Backend      │    │   Database      │
-│   (Vercel)      │◄──►│   (Railway)     │◄──►│  (Supabase)     │
+│   (Vercel)      │◄──►│   (Render)      │◄──►│  (Supabase)     │
 │                 │    │                 │    │                 │
 │ • HTML/CSS/JS   │    │ • FastAPI       │    │ • PostgreSQL    │
 │ • Responsive    │    │ • Hexagonal     │    │ • Real-time     │
@@ -61,7 +61,7 @@ Sistema completo de autoatendimento para restaurantes fast food, desenvolvido co
 
 ### **Infrastructure**
 - **Frontend Host**: Vercel
-- **Backend Host**: Railway
+- **Backend Host**: Render
 - **Database**: Supabase
 - **Container**: Docker
 - **CI/CD**: GitHub Actions (opcional)
@@ -81,6 +81,7 @@ fastfood/
 │   ├── 📁 script/              # Scripts utilitários
 │   ├── 🐳 Dockerfile           # Container
 │   ├── 📋 Makefile             # Comandos
+│   ├── 📦 requirements.txt     # Dependências Python
 │   └── 📦 pyproject.toml       # Dependências
 ├── 📁 frontend/                # Interface web
 │   ├── 🎨 styles.css           # Estilos
@@ -95,6 +96,7 @@ fastfood/
 ├── 📁 scripts/                 # Scripts de automação
 ├── 🚀 DEPLOY_GUIDE.md          # Guia de deploy
 ├── 🌐 vercel.json              # Config Vercel
+├── 🎯 render.yaml              # Config Render
 └── 📖 README.md                # Este arquivo
 ```
 
@@ -112,6 +114,16 @@ cd fastfood
 
 ### **2. Deploy Manual**
 
+#### **Backend (Render)**
+1. Acesse [Render.com](https://render.com)
+2. New Web Service → Connect Repository
+3. Selecione o repositório `fastfood`
+4. Configure:
+   - **Build Command**: `cd backend && pip install -r requirements.txt && alembic upgrade head`
+   - **Start Command**: `cd backend && uvicorn src.main:app --host 0.0.0.0 --port $PORT`
+5. Adicione variáveis de ambiente
+6. Deploy
+
 #### **Frontend (Vercel)**
 1. Acesse [Vercel.com](https://vercel.com)
 2. New Project → Import Git Repository
@@ -121,9 +133,18 @@ cd fastfood
 
 ### **3. Variáveis de Ambiente**
 
+#### **Render (Backend)**
+```env
+DATABASE_URL=postgresql://user:pass@host:port/db
+SECRET_KEY=your-secret-key
+ENVIRONMENT=production
+DEBUG=false
+CORS_ALLOW_ORIGINS=https://fastfood.vercel.app
+```
+
 #### **Vercel (Frontend)**
 ```env
-API_URL=https://fastfood-api.railway.app
+API_URL=https://fastfood-api.onrender.com
 ```
 
 ## 🧪 Desenvolvimento Local
@@ -168,6 +189,7 @@ make dev
 ## 📈 Monitoramento
 
 - **Vercel**: Analytics e performance do frontend
+- **Render**: Logs e métricas do backend
 - **Supabase**: Queries e storage do banco
 
 ## 🤝 Contribuição
@@ -186,13 +208,13 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 - **Desenvolvimento**: [Seu Nome]
 - **Arquitetura**: Clean Architecture + Hexagonal
-- **Deploy**: Vercel + Supabase
+- **Deploy**: Vercel + Render + Supabase
 
 ## 📞 Suporte
 
 - **Issues**: [GitHub Issues](https://github.com/mbxagency/fastfood/issues)
 - **Documentação**: [docs/](docs/)
-- **API Docs**: [https://fastfood-api.railway.app/docs](https://fastfood-api.railway.app/docs)
+- **API Docs**: [https://fastfood-api.onrender.com/docs](https://fastfood-api.onrender.com/docs)
 
 ---
 
