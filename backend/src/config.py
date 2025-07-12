@@ -1,7 +1,11 @@
 import os
 from typing import List
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
 
+# Carrega .env apenas se existir (para ambiente local)
+if os.path.exists('.env'):
+    load_dotenv('.env')
 
 class Settings(BaseSettings):
     # Database - Get from Render environment
@@ -30,6 +34,7 @@ class Settings(BaseSettings):
     API_TITLE: str = os.getenv("PROJECT_NAME", "FastFood API")
     API_DESCRIPTION: str = "API para sistema de autoatendimento de fast food"
     API_VERSION: str = os.getenv("VERSION", "1.0.0")
+    API_PREFIX: str = os.getenv("API_PREFIX", "/v1")
     
     # Logging - Get from Render environment
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
@@ -70,7 +75,6 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
-
 
 # Create settings instance
 settings = Settings() 

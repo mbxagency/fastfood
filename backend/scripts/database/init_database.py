@@ -49,7 +49,7 @@ def run_migrations():
     print("🔄 Executando migrações Alembic...")
     
     try:
-        # Get the alembic.ini path from the new config directory
+        # Get the alembic.ini path from the config directory
         alembic_cfg = Config(str(Path(__file__).parent.parent.parent / "config" / "alembic.ini"))
         
         # Run migrations

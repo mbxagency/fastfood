@@ -147,3 +147,8 @@ O site é totalmente responsivo e funciona em:
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. 
+
+## Variáveis de Ambiente
+
+- Local: copie `.env.local.example` para `.env.local` e ajuste o valor de `VITE_API_URL`.
+- Produção (Vercel): configure `VITE_API_URL` no painel do Vercel. 
