@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     DEBUG: bool = os.getenv("DEBUG", "true").lower() == "true"
     
-    # CORS
+    # CORS - Initialize as empty list
     CORS_ALLOW_ORIGINS: List[str] = []
     CORS_ALLOW_CREDENTIALS: bool = True
     CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE"]
@@ -30,18 +30,23 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # Process CORS_ALLOW_ORIGINS after initialization
-        cors_origins = os.getenv("CORS_ALLOW_ORIGINS", "http://localhost:3000")
-        if cors_origins:
-            self.CORS_ALLOW_ORIGINS = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
-        else:
-            self.CORS_ALLOW_ORIGINS = ["http://localhost:3000"]
-    
     class Config:
         env_file = ".env"
         case_sensitive = False
+
+    def model_post_init(self, __context) -> None:
+        """Process CORS_ALLOW_ORIGINS after model initialization"""
+        cors_origins = os.getenv("CORS_ALLOW_ORIGINS", "http://localhost:3000")
+        if cors_origins:
+            # Split by comma and clean up each origin
+            origins = []
+            for origin in cors_origins.split(","):
+                origin = origin.strip()
+                if origin:
+                    origins.append(origin)
+            self.CORS_ALLOW_ORIGINS = origins
+        else:
+            self.CORS_ALLOW_ORIGINS = ["http://localhost:3000"]
 
 
 # Create settings instance
