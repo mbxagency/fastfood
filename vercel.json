@@ -14,6 +14,9 @@
     }
   ],
   "env": {
-    "API_URL": "https://fastfood-api.railway.app"
-  }
+    "API_URL": "https://fastfood-api.onrender.com"
+  },
+  "functions": {},
+  "regions": ["gru1"],
+  "public": true
 } 

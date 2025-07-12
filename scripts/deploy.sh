@@ -218,7 +218,7 @@ deploy_production() {
     
     print_success "Production deploy completed"
     print_status "Frontend will be deployed automatically by Vercel"
-    print_status "Backend will be deployed automatically by Railway"
+    print_status "Backend will be deployed automatically by Render"
 }
 
 # Main deployment process
@@ -238,9 +238,9 @@ main() {
     print_success "🎉 Deploy completed successfully!"
     echo ""
     echo "📊 System Status:"
-    echo "   Frontend: https://fastfood.vercel.app"
-    echo "   Backend:  https://fastfood-api.railway.app"
-    echo "   API Docs: https://fastfood-api.railway.app/docs"
+    echo "   Frontend: https://fastfood-murex.vercel.app"
+    echo "   Backend:  https://fastfood-api.onrender.com"
+    echo "   API Docs: https://fastfood-api.onrender.com/docs"
     echo ""
     echo "🔧 Next Steps:"
     echo "   1. Configure your domain in Vercel"

@@ -21,7 +21,7 @@ services:
       - key: DEBUG
         value: false
       - key: CORS_ALLOW_ORIGINS
-        value: https://fastfood.vercel.app
+        value: https://fastfood-murex.vercel.app
       - key: API_PREFIX
         value: /v1
       - key: PROJECT_NAME
