@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: postech-app-hpa
-  namespace: postech-fase2
+  name: fastfood-api-hpa
+  namespace: fastfood
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: postech-app-deployment
+    name: fastfood-api
   minReplicas: 2
   maxReplicas: 10
   metrics:

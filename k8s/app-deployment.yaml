@@ -1,66 +1,84 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postech-app-deployment
-  namespace: postech-fase2
+  name: fastfood-api
+  namespace: fastfood
+  labels:
+    app: fastfood-api
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: postech-app
+      app: fastfood-api
   template:
     metadata:
       labels:
-        app: postech-app
+        app: fastfood-api
     spec:
+      initContainers:
+      - name: init-database
+        image: fastfood-api:latest
+        command: ["python", "/app/scripts/init_database.py"]
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: fastfood-config
+              key: DATABASE_URL
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: fastfood-secrets
+              key: JWT_SECRET_KEY
+        - name: ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: fastfood-secrets
+              key: ADMIN_USERNAME
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: fastfood-secrets
+              key: ADMIN_PASSWORD
+        envFrom:
+        - configMapRef:
+            name: fastfood-config
       containers:
-      - name: postech-app
-        image: postech-app:latest
+      - name: fastfood-api
+        image: fastfood-api:latest
         ports:
         - containerPort: 8000
         env:
         - name: DATABASE_URL
           valueFrom:
             configMapKeyRef:
-              name: postech-app-config
+              name: fastfood-config
               key: DATABASE_URL
-        - name: ENVIRONMENT
-          valueFrom:
-            configMapKeyRef:
-              name: postech-app-config
-              key: ENVIRONMENT
-        - name: LOG_LEVEL
-          valueFrom:
-            configMapKeyRef:
-              name: postech-app-config
-              key: LOG_LEVEL
-        - name: CORS_ORIGINS
-          valueFrom:
-            configMapKeyRef:
-              name: postech-app-config
-              key: CORS_ORIGINS
-        - name: API_PREFIX
-          valueFrom:
-            configMapKeyRef:
-              name: postech-app-config
-              key: API_PREFIX
-        - name: JWT_SECRET_KEY
+        - name: SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: postech-app-secrets
+              name: fastfood-secrets
               key: JWT_SECRET_KEY
-        - name: MERCADO_PAGO_ACCESS_TOKEN
+        - name: ADMIN_USERNAME
           valueFrom:
             secretKeyRef:
-              name: postech-app-secrets
-              key: MERCADO_PAGO_ACCESS_TOKEN
+              name: fastfood-secrets
+              key: ADMIN_USERNAME
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: fastfood-secrets
+              key: ADMIN_PASSWORD
+        envFrom:
+        - configMapRef:
+            name: fastfood-config
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
             memory: "256Mi"
-            cpu: "200m"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
         livenessProbe:
           httpGet:
             path: /health
@@ -77,12 +95,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postech-app-service
-  namespace: postech-fase2
+  name: fastfood-api-service
+  namespace: fastfood
 spec:
   selector:
-    app: postech-app
+    app: fastfood-api
   ports:
-  - port: 80
+  - protocol: TCP
+    port: 80
     targetPort: 8000
   type: ClusterIP 

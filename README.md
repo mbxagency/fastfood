@@ -2,27 +2,18 @@
 
 Sistema completo de autoatendimento para restaurantes fast food, desenvolvido com arquitetura hexagonal e tecnologias modernas.
 
-## 🚀 Demo
+## ✨ Funcionalidades
 
-- **Frontend**: [https://fastfood.vercel.app](https://fastfood.vercel.app)
-- **API Docs**: [https://fastfood-api.onrender.com/docs](https://fastfood-api.onrender.com/docs)
-- **Health Check**: [https://fastfood-api.onrender.com/health](https://fastfood-api.onrender.com/health)
-
-## 📋 Funcionalidades
-
-### **👥 Cliente**
-- ✅ Menu interativo com categorias
-- ✅ Carrinho de compras
-- ✅ Sistema de pedidos
-- ✅ Acompanhamento em tempo real
-- ✅ Pagamento integrado
-
-### **👨‍💼 Administrador**
-- ✅ Gestão de produtos
-- ✅ Controle de pedidos
-- ✅ Relatórios de vendas
-- ✅ Gestão de clientes
-- ✅ Dashboard administrativo
+- ✅ Interface responsiva e moderna
+- ✅ Carrinho de compras funcional
+- ✅ Sistema de pedidos completo
+- ✅ API REST documentada
+- ✅ Autenticação JWT
+- ✅ Banco de dados PostgreSQL
+- ✅ Deploy automatizado
+- ✅ Auto scaling
+- ✅ Health checks
+- ✅ Produtos populados automaticamente
 
 ## 🏗️ Arquitetura
 
@@ -70,34 +61,51 @@ Sistema completo de autoatendimento para restaurantes fast food, desenvolvido co
 
 ```
 fastfood/
-├── 📁 backend/                 # API FastAPI
-│   ├── 📁 src/
-│   │   ├── 📁 adapters/        # Controllers e DTOs
-│   │   ├── 📁 application/     # Services
-│   │   ├── 📁 domain/          # Models
-│   │   ├── 📁 infrastructure/  # Repositories
-│   │   └── 📁 ports/           # Interfaces
-│   ├── 📁 alembic/             # Migrations
-│   ├── 📁 script/              # Scripts utilitários
-│   ├── 🐳 Dockerfile           # Container
-│   ├── 📋 Makefile             # Comandos
-│   ├── 📦 requirements.txt     # Dependências Python
-│   └── 📦 pyproject.toml       # Dependências
-├── 📁 frontend/                # Interface web
-│   ├── 🎨 styles.css           # Estilos
-│   ├── ⚡ script.js            # Lógica
-│   ├── 📄 index.html           # Página principal
-│   └── 📖 README.md            # Documentação
-├── 📁 docs/                    # Documentação
-│   ├── 📊 architecture.puml    # Diagramas
-│   ├── 🔄 fluxos-*.puml        # Fluxos
-│   └── 🧪 postman-collection.json
-├── 📁 k8s/                     # Kubernetes (opcional)
-├── 📁 scripts/                 # Scripts de automação
-├── 🚀 DEPLOY_GUIDE.md          # Guia de deploy
-├── 🌐 vercel.json              # Config Vercel
-├── 🎯 render.yaml              # Config Render
-└── 📖 README.md                # Este arquivo
+├── 📁 backend/                    # API FastAPI
+│   ├── 📁 src/                    # Código fonte
+│   │   ├── 📁 adapters/           # Controllers e DTOs
+│   │   ├── 📁 application/        # Services
+│   │   ├── 📁 domain/             # Models
+│   │   ├── 📁 infrastructure/     # Repositories
+│   │   └── 📁 ports/              # Interfaces
+│   ├── 📁 config/                 # Configurações
+│   │   ├── 📁 alembic/            # Migrations
+│   │   └── 📄 alembic.ini         # Config Alembic
+│   ├── 📁 deploy/                 # Deploy
+│   │   ├── 🐳 Dockerfile          # Container
+│   │   ├── 📄 .render-buildpacks  # Render config
+│   │   └── 📄 runtime.txt         # Python version
+│   ├── 📁 scripts/                # Scripts utilitários
+│   │   ├── 📁 database/           # Scripts de banco
+│   │   └── 📁 utils/              # Utilitários
+│   ├── 📦 requirements.txt        # Dependências Python
+│   └── 📄 main.py                 # Entry point
+├── 📁 frontend/                   # Interface web
+│   ├── 📁 assets/                 # Recursos estáticos
+│   │   ├── 📁 css/                # Estilos
+│   │   ├── 📁 js/                 # JavaScript
+│   │   └── 📁 images/             # Imagens
+│   ├── 📁 components/             # Componentes
+│   ├── 📁 pages/                  # Páginas
+│   ├── 📁 utils/                  # Utilitários
+│   └── 📄 index.html              # Página principal
+├── 📁 deploy/                     # Configurações de deploy
+│   ├── 📋 render.yaml             # Config Render
+│   └── 🌐 vercel.json             # Config Vercel
+├── 📁 scripts/                    # Scripts de automação
+│   ├── 📁 deploy/                 # Scripts de deploy
+│   ├── 📁 setup/                  # Scripts de setup
+│   ├── 📁 verify/                 # Scripts de verificação
+│   ├── 📁 kubernetes/             # Scripts K8s
+│   └── 🚀 main.sh                 # Script principal
+├── 📁 docs/                       # Documentação
+│   ├── 📁 architecture/           # Diagramas de arquitetura
+│   ├── 📁 api/                    # Documentação da API
+│   ├── 📁 deployment/             # Guias de deploy
+│   └── 📁 development/            # Documentação de desenvolvimento
+├── 📁 k8s/                        # Kubernetes (opcional)
+├── 🚀 scripts/main.sh             # Script principal
+└── 📖 README.md                   # Este arquivo
 ```
 
 ## 🚀 Deploy Rápido
@@ -105,58 +113,76 @@ fastfood/
 ### **1. Pré-requisitos**
 ```bash
 # Clone o repositório
-git clone https://github.com/mbxagency/fastfood.git
+git clone https://github.com/murilobiss/fastfood.git
 cd fastfood
 
-# Execute o script de deploy
-./scripts/deploy.sh
+# Execute o script principal
+./scripts/main.sh setup
 ```
 
-### **2. Deploy Manual**
+### **2. Deploy Automático**
 
 #### **Backend (Render)**
 1. Acesse [Render.com](https://render.com)
 2. New Web Service → Connect Repository
 3. Selecione o repositório `fastfood`
-4. Configure:
-   - **Build Command**: `cd backend && pip install -r requirements.txt && alembic upgrade head`
-   - **Start Command**: `cd backend && uvicorn src.main:app --host 0.0.0.0 --port $PORT`
-5. Adicione variáveis de ambiente
-6. Deploy
+4. Configure as variáveis de ambiente (ver script setup)
+5. Deploy automático
 
 #### **Frontend (Vercel)**
 1. Acesse [Vercel.com](https://vercel.com)
 2. New Project → Import Git Repository
 3. Configure Output Directory: `frontend`
-4. Adicione variável: `API_URL`
-5. Deploy
+4. Deploy automático
 
-### **3. Variáveis de Ambiente**
+### **3. Variáveis de Ambiente (Render)**
 
-#### **Render (Backend)**
+Todas as variáveis são configuradas automaticamente no Render:
+
 ```env
-DATABASE_URL=postgresql://user:pass@host:port/db
+DATABASE_URL=postgresql://postech:password@host:port/db
 SECRET_KEY=your-secret-key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your-admin-password
 ENVIRONMENT=production
 DEBUG=false
-CORS_ALLOW_ORIGINS=https://fastfood.vercel.app
-```
-
-#### **Vercel (Frontend)**
-```env
-API_URL=https://fastfood-api.onrender.com
+CORS_ALLOW_ORIGINS=https://fastfood-murex.vercel.app
+API_PREFIX=/v1
+PROJECT_NAME=FastFood API
+VERSION=1.0.0
+LOG_LEVEL=INFO
 ```
 
 ## 🧪 Desenvolvimento Local
 
-### **Frontend**
+### **Usando o Script Principal**
 ```bash
-cd frontend
+# Iniciar desenvolvimento
+./scripts/main.sh dev
 
-# Servir localmente
+# Executar testes
+./scripts/main.sh test
+
+# Verificar deploy
+./scripts/main.sh verify
+
+# Limpar arquivos temporários
+./scripts/main.sh clean
+```
+
+### **Manual**
+```bash
+# Frontend
+cd frontend
 python -m http.server 3000
-# ou
-npx serve .
+
+# Backend
+cd backend
+pip install -r requirements.txt
+python scripts/database/init_database.py
+uvicorn src.main:app --reload
 ```
 
 ## 📊 API Endpoints
@@ -168,7 +194,7 @@ npx serve .
 - `GET /v1/api/public/pedidos/{id}` - Consultar pedido
 
 ### **Administrativos**
-- `POST /v1/api/admin/auth/login` - Login admin
+- `POST /v1/api/public/login` - Login admin
 - `GET /v1/api/admin/produtos` - Gestão produtos
 - `GET /v1/api/admin/pedidos` - Gestão pedidos
 - `GET /v1/api/admin/clientes` - Gestão clientes
@@ -176,14 +202,17 @@ npx serve .
 ## 🔧 Comandos Úteis
 
 ```bash
-# Deploy completo
-./scripts/deploy.sh
+# Script principal
+./scripts/main.sh help
+
+# Setup de variáveis
+./scripts/main.sh setup
+
+# Deploy Kubernetes (opcional)
+./scripts/main.sh k8s
 
 # Verificar qualidade do código
-make lint
-
-# Testar API localmente
-make dev
+./scripts/main.sh test
 ```
 
 ## 📈 Monitoramento
@@ -212,7 +241,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 📞 Suporte
 
-- **Issues**: [GitHub Issues](https://github.com/mbxagency/fastfood/issues)
+- **Issues**: [GitHub Issues](https://github.com/murilobiss/fastfood/issues)
 - **Documentação**: [docs/](docs/)
 - **API Docs**: [https://fastfood-api.onrender.com/docs](https://fastfood-api.onrender.com/docs)
 

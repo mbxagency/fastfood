@@ -4,34 +4,34 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # Database
+    # Database - Get from Render environment
     DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/fastfood")
     
-    # Security
+    # Security - Get from Render environment
     SECRET_KEY: str = os.getenv("SECRET_KEY", "fastfood-secret-key-change-in-production")
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
     
-    # Admin Authentication
+    # Admin Authentication - Get from Render environment
     ADMIN_USERNAME: str = os.getenv("ADMIN_USERNAME", "admin")
     ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin123")
     
-    # Environment
+    # Environment - Get from Render environment
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     DEBUG: bool = os.getenv("DEBUG", "true").lower() == "true"
     
-    # CORS - Use string and convert to list when needed
+    # CORS - Get from Render environment
     CORS_ALLOW_ORIGINS_STR: str = os.getenv("CORS_ALLOW_ORIGINS", "http://localhost:3000")
     CORS_ALLOW_CREDENTIALS: bool = True
     CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE"]
     CORS_ALLOW_HEADERS: List[str] = ["*"]
     
-    # API
-    API_TITLE: str = "FastFood API"
+    # API - Get from Render environment
+    API_TITLE: str = os.getenv("PROJECT_NAME", "FastFood API")
     API_DESCRIPTION: str = "API para sistema de autoatendimento de fast food"
-    API_VERSION: str = "1.0.0"
+    API_VERSION: str = os.getenv("VERSION", "1.0.0")
     
-    # Logging
+    # Logging - Get from Render environment
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     
     def __init__(self, **kwargs):

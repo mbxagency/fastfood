@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 🛠️ FastFood Environment Setup Script
-# Script para configurar variáveis de ambiente
+# Script para configurar variáveis de ambiente no Render
 
 set -e
 
@@ -28,23 +28,8 @@ print_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
 
-echo "🍔 FastFood Environment Setup"
-echo "=============================="
-
-# Check if we're in the right directory
-if [ ! -f "backend/env.render" ]; then
-    print_error "Execute este script na raiz do projeto FastFood"
-    exit 1
-fi
-
-# Create .env file from template
-if [ ! -f "backend/.env" ]; then
-    print_info "Criando arquivo .env..."
-    cp backend/env.render backend/.env
-    print_success "Arquivo .env criado com sucesso!"
-else
-    print_warning "Arquivo .env já existe"
-fi
+echo "🍔 FastFood Environment Setup - Render"
+echo "======================================"
 
 echo ""
 print_info "📋 Variáveis de Ambiente para o Render:"
@@ -78,5 +63,23 @@ echo "5. Clique em 'Save Changes'"
 echo "6. O serviço será redeployado automaticamente"
 echo ""
 
+print_info "🔧 Script de Inicialização:"
+echo ""
+echo "O deploy agora inclui automaticamente:"
+echo "✅ Migrações Alembic"
+echo "✅ População de produtos (14 produtos)"
+echo "✅ Verificação do banco"
+echo "✅ Health checks"
+echo ""
+
 print_success "✅ Setup concluído!"
-print_info "💡 Dica: Você pode copiar e colar as variáveis acima diretamente no Render" 
+print_info "💡 Dica: Você pode copiar e colar as variáveis acima diretamente no Render"
+
+echo ""
+print_info "🔍 Deseja verificar o deploy? (y/n)"
+read -r response
+if [[ "$response" =~ ^[Yy]$ ]]; then
+    echo ""
+    print_info "Executando verificação..."
+    ./scripts/verify-deploy.sh
+fi 

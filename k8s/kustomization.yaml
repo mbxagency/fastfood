@@ -1,18 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: postech-fase2
+namespace: fastfood
 
 resources:
 - namespace.yaml
-- configmap.yaml
 - secret.yaml
+- configmap.yaml
 - postgres-persistent-volume.yaml
 - postgres-deployment.yaml
 - app-deployment.yaml
-- hpa.yaml
 - ingress.yaml
+- hpa.yaml
 
 commonLabels:
-  app.kubernetes.io/name: postech-fase2
-  app.kubernetes.io/version: v2.0.0 
+  app: fastfood
+  version: v1.0.0 

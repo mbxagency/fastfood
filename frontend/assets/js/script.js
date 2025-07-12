@@ -1,10 +1,78 @@
 // API Configuration
 const API_BASE_URL = 'https://fastfood-api.onrender.com' || 'http://localhost:8000';
 
+// Mock data for fallback
+const mockProducts = [
+    {
+        id: 1,
+        nome: "X-Burger Clássico",
+        descricao: "Hambúrguer com queijo, alface, tomate e molho especial",
+        preco: 15.90,
+        categoria: "burgers"
+    },
+    {
+        id: 2,
+        nome: "X-Bacon",
+        descricao: "Hambúrguer com bacon crocante, queijo e molho barbecue",
+        preco: 18.90,
+        categoria: "burgers"
+    },
+    {
+        id: 3,
+        nome: "X-Frango",
+        descricao: "Filé de frango grelhado com queijo e salada",
+        preco: 16.90,
+        categoria: "burgers"
+    },
+    {
+        id: 4,
+        nome: "Refrigerante Cola",
+        descricao: "Refrigerante cola 350ml gelado",
+        preco: 5.90,
+        categoria: "drinks"
+    },
+    {
+        id: 5,
+        nome: "Suco Natural",
+        descricao: "Suco natural de laranja 300ml",
+        preco: 6.90,
+        categoria: "drinks"
+    },
+    {
+        id: 6,
+        nome: "Batata Frita",
+        descricao: "Porção de batatas fritas crocantes",
+        preco: 8.90,
+        categoria: "sides"
+    },
+    {
+        id: 7,
+        nome: "Onion Rings",
+        descricao: "Anéis de cebola empanados e fritos",
+        preco: 9.90,
+        categoria: "sides"
+    },
+    {
+        id: 8,
+        nome: "Sorvete de Chocolate",
+        descricao: "Sorvete cremoso de chocolate com calda",
+        preco: 7.90,
+        categoria: "desserts"
+    },
+    {
+        id: 9,
+        nome: "Milk Shake",
+        descricao: "Milk shake de baunilha com chantilly",
+        preco: 12.90,
+        categoria: "desserts"
+    }
+];
+
 // Cart state
 let cart = [];
 let currentCategory = 'all';
 let apiProducts = [];
+let useMockData = false;
 
 // DOM elements
 const menuGrid = document.getElementById('menuGrid');
@@ -96,14 +164,18 @@ async function loadProductsFromAPI() {
         const response = await fetch(`${API_BASE_URL}/v1/api/public/produtos`);
         if (response.ok) {
             apiProducts = await response.json();
+            useMockData = false;
             console.log('✅ Produtos carregados da API:', apiProducts.length);
             loadProducts();
         } else {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar produtos da API:', error);
-        showErrorState();
+        console.warn('⚠️ Erro ao carregar produtos da API, usando dados mock:', error);
+        apiProducts = mockProducts;
+        useMockData = true;
+        showNotification('Usando dados de demonstração (API indisponível)', 'info');
+        loadProducts();
     }
 }
 
@@ -359,6 +431,15 @@ async function checkout() {
         return sum + (item.preco * item.quantity);
     }, 0);
     
+    // If using mock data, show demo message
+    if (useMockData) {
+        showNotification('Demonstração: Pedido processado com sucesso!', 'success');
+        cart = [];
+        updateCartDisplay();
+        closeCart();
+        return;
+    }
+    
     // Try to create order via API
     try {
         showNotification('Processando pedido...', 'info');
@@ -382,9 +463,9 @@ async function checkout() {
         
         if (response.ok) {
             const result = await response.json();
-            showNotification(`Pedido #${result.id} realizado com sucesso!`, 'success');
+            showNotification(`Pedido criado com sucesso! ID: ${result.id}`, 'success');
         } else {
-            throw new Error('Erro na API');
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
     } catch (error) {
         console.warn('Erro ao criar pedido via API:', error);
@@ -546,30 +627,6 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Simulate real-time order updates
-setInterval(() => {
-    const progressBars = document.querySelectorAll('.progress-fill');
-    progressBars.forEach(bar => {
-        const currentWidth = parseInt(bar.style.width);
-        if (currentWidth < 100) {
-            bar.style.width = (currentWidth + 1) + '%';
-        }
-    });
-}, 5000);
-
-// Add some interactivity to the architecture cards
-document.addEventListener('DOMContentLoaded', function() {
-    const archCards = document.querySelectorAll('.arch-card');
-    archCards.forEach(card => {
-        card.addEventListener('click', function() {
-            this.style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                this.style.transform = 'translateY(-5px)';
-            }, 200);
-        });
-    });
-});
-
 // Simulate API health check
 function checkAPIHealth() {
     return fetch(`${API_BASE_URL}/health`)
@@ -585,4 +642,4 @@ setInterval(async () => {
     if (statNumbers.length > 1) {
         statNumbers[1].textContent = health.responseTime;
     }
-}, 10000); 
+}, 10000);
