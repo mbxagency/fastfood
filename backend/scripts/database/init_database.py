@@ -45,8 +45,65 @@ def wait_for_database(max_retries=30, delay=2):
     print("❌ Banco de dados não ficou disponível")
     return False
 
+def check_table_exists(engine, table_name):
+    """Check if a table exists in the database"""
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(text(f"""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = '{table_name}'
+                )
+            """))
+            return result.scalar()
+    except Exception:
+        return False
+
+def check_migration_status():
+    """Check if migrations have already been applied"""
+    print("🔍 Verificando status das migrações...")
+    
+    try:
+        database_url = get_database_url()
+        if not database_url:
+            print("❌ DATABASE_URL não configurada")
+            return False
+            
+        engine = create_engine(database_url)
+        
+        # Check if alembic_version table exists
+        if not check_table_exists(engine, 'alembic_version'):
+            print("📋 Tabela alembic_version não existe - primeira execução")
+            return False
+        
+        # Check if main tables exist
+        main_tables = ['tb_produtos', 'tb_clientes', 'tb_pedidos']
+        existing_tables = []
+        
+        for table in main_tables:
+            if check_table_exists(engine, table):
+                existing_tables.append(table)
+        
+        if existing_tables:
+            print(f"✅ Tabelas existentes encontradas: {', '.join(existing_tables)}")
+            return True
+        else:
+            print("📋 Nenhuma tabela principal encontrada")
+            return False
+            
+    except Exception as e:
+        print(f"⚠️ Erro ao verificar status: {e}")
+        return False
+
 def run_migrations():
-    """Run Alembic migrations"""
+    """Run Alembic migrations only if needed"""
+    print("🔄 Verificando necessidade de migrações...")
+    
+    # Check if migrations are already applied
+    if check_migration_status():
+        print("✅ Migrações já aplicadas, pulando...")
+        return True
+    
     print("🔄 Executando migrações Alembic...")
     
     try:
@@ -61,8 +118,30 @@ def run_migrations():
         print(f"❌ Erro ao executar migrações: {e}")
         return False
 
+def check_products_exist():
+    """Check if products already exist in the database"""
+    try:
+        database_url = get_database_url()
+        if not database_url:
+            return False
+            
+        engine = create_engine(database_url)
+        
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT COUNT(*) FROM tb_produtos"))
+            count = result.scalar()
+            return count is not None and count > 0
+    except Exception:
+        return False
+
 def populate_products():
-    """Populate products table"""
+    """Populate products table only if empty"""
+    print("🔄 Verificando produtos existentes...")
+    
+    if check_products_exist():
+        print("✅ Produtos já existem, pulando população...")
+        return True
+    
     print("🔄 Populando tabela de produtos...")
     
     try:
@@ -183,11 +262,11 @@ def main():
     if not wait_for_database():
         sys.exit(1)
     
-    # Step 2: Run migrations
+    # Step 2: Run migrations (only if needed)
     if not run_migrations():
         sys.exit(1)
     
-    # Step 3: Populate products
+    # Step 3: Populate products (only if needed)
     if not populate_products():
         sys.exit(1)
     
