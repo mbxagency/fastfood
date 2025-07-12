@@ -242,15 +242,9 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 👥 Equipe
 
-- **Desenvolvimento**: [Seu Nome]
+- **Desenvolvimento**: Thais Miranda, Matheus Luchiari e Murilo Biss
 - **Arquitetura**: Clean Architecture + Hexagonal
 - **Deploy**: Vercel + Render
-
-## 📞 Suporte
-
-- **Issues**: [GitHub Issues](https://github.com/murilobiss/fastfood/issues)
-- **Documentação**: [docs/](docs/)
-- **API Docs**: [https://fastfood-api.onrender.com/docs](https://fastfood-api.onrender.com/docs)
 
 ---
 
