@@ -2,14 +2,14 @@
 const CONFIG = {
     API_BASE_URL: 'https://fastfood-vwtq.onrender.com',
     ENDPOINTS: {
-        PRODUCTS: '/api/public/produtos',
-        ORDERS: '/api/public/pedidos',
-        CUSTOMERS: '/api/public/clientes',
-        PAYMENTS: '/api/public/pagamentos',
-        ADMIN_LOGIN: '/api/admin/auth/login',
-        ADMIN_ORDERS: '/api/admin/pedidos',
-        ADMIN_PRODUCTS: '/api/admin/produtos',
-        ADMIN_CUSTOMERS: '/api/admin/clientes'
+        PRODUCTS: '/v1/api/public/produtos',
+        ORDERS: '/v1/api/public/pedidos',
+        CUSTOMERS: '/v1/api/public/clientes',
+        PAYMENTS: '/v1/api/public/pagamentos',
+        ADMIN_LOGIN: '/v1/api/public/login',
+        ADMIN_ORDERS: '/v1/api/admin/pedidos',
+        ADMIN_PRODUCTS: '/v1/api/admin/produtos',
+        ADMIN_CUSTOMERS: '/v1/api/admin/clientes'
     },
     ADMIN_CREDENTIALS: {
         USERNAME: process.env.ADMIN_USERNAME || 'admin',
@@ -141,18 +141,36 @@ const API = {
     },
 
     async adminLogin(username, password) {
-        const response = await this.request(CONFIG.ADMIN_LOGIN, {
+        console.log('🔑 API: Login attempt for username:', username);
+        console.log('🔑 API: Endpoint:', CONFIG.ENDPOINTS.ADMIN_LOGIN);
+        
+        // Create FormData for login (backend expects form data)
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('password', password);
+        
+        const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.ADMIN_LOGIN}`, {
             method: 'POST',
-            body: JSON.stringify({ username, password })
+            body: formData
         });
         
-        if (response.token) {
-            STATE.adminToken = response.token;
-            STATE.isAdmin = true;
-            localStorage.setItem('adminToken', response.token);
+        console.log('🔑 API: Login response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        return response;
+        const data = await response.json();
+        console.log('🔑 API: Login response data:', data);
+        
+        if (data.access_token) {
+            STATE.adminToken = data.access_token;
+            STATE.isAdmin = true;
+            localStorage.setItem('adminToken', data.access_token);
+            console.log('✅ API: Token saved successfully');
+        }
+        
+        return data;
     }
 };
 
@@ -261,8 +279,20 @@ const AdminPanel = {
 
     bindEvents() {
         // Admin login buttons
-        document.getElementById('adminLink')?.addEventListener('click', () => this.showLoginModal());
-        document.getElementById('footerAdminLink')?.addEventListener('click', () => this.showLoginModal());
+        const adminLink = document.getElementById('adminLink');
+        const footerAdminLink = document.getElementById('footerAdminLink');
+        
+        console.log('🔍 Admin buttons found:', { adminLink: !!adminLink, footerAdminLink: !!footerAdminLink });
+        
+        adminLink?.addEventListener('click', () => {
+            console.log('🔑 Admin button clicked');
+            this.showLoginModal();
+        });
+        
+        footerAdminLink?.addEventListener('click', () => {
+            console.log('🔑 Footer admin button clicked');
+            this.showLoginModal();
+        });
         
         // Admin modal events
         document.getElementById('closeAdmin')?.addEventListener('click', () => this.hideLoginModal());
@@ -278,7 +308,14 @@ const AdminPanel = {
     },
 
     showLoginModal() {
-        document.getElementById('adminModal').classList.add('active');
+        console.log('🔑 Showing login modal');
+        const modal = document.getElementById('adminModal');
+        if (modal) {
+            modal.classList.add('active');
+            console.log('✅ Modal shown');
+        } else {
+            console.error('❌ Modal not found');
+        }
     },
 
     hideLoginModal() {
@@ -288,15 +325,22 @@ const AdminPanel = {
     async handleLogin(e) {
         e.preventDefault();
         
+        console.log('🔑 Login attempt started');
+        
         const username = document.getElementById('adminUsername').value;
         const password = document.getElementById('adminPassword').value;
         
+        console.log('🔑 Credentials:', { username, password: password ? '***' : 'empty' });
+        
         try {
+            console.log('🔑 Calling API login...');
             await API.adminLogin(username, password);
+            console.log('✅ Login successful');
             this.hideLoginModal();
             this.showAdminPanel();
             Utils.showNotification('Login realizado com sucesso!', 'success');
         } catch (error) {
+            console.error('❌ Login failed:', error);
             Utils.showNotification('Credenciais inválidas!', 'error');
         }
     },
@@ -501,12 +545,17 @@ const AdminPanel = {
 const Products = {
     async loadProducts() {
         try {
-            console.log('🔄 Carregando produtos do backend...');
+            console.log('🔄 Iniciando carregamento de produtos...');
+            console.log('📍 URL da API:', `${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.PRODUCTS}`);
             
             // Check cache first
             const cachedProducts = localStorage.getItem('cachedProducts');
             const cacheTimestamp = localStorage.getItem('productsCacheTimestamp');
             const now = Date.now();
+            
+            console.log('💾 Cache encontrado:', !!cachedProducts);
+            console.log('⏰ Timestamp do cache:', cacheTimestamp);
+            console.log('🕐 Tempo atual:', now);
             
             // Use cache if it's less than 5 minutes old
             if (cachedProducts && cacheTimestamp && (now - parseInt(cacheTimestamp)) < 300000) {
@@ -517,9 +566,14 @@ const Products = {
                 return;
             }
             
+            console.log('🌐 Fazendo requisição para o backend...');
+            
             // Add timeout to the fetch request (reduced to 3 seconds)
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const timeoutId = setTimeout(() => {
+                console.log('⏰ Timeout atingido (3s)');
+                controller.abort();
+            }, 3000);
             
             const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.PRODUCTS}`, {
                 signal: controller.signal,
@@ -531,12 +585,15 @@ const Products = {
             
             clearTimeout(timeoutId);
             
+            console.log('📡 Resposta recebida:', response.status, response.statusText);
+            
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
             const products = await response.json();
             console.log('📦 Produtos carregados do backend:', products);
+            console.log('📊 Quantidade de produtos:', products?.length || 0);
             
             if (!products || products.length === 0) {
                 throw new Error('Nenhum produto encontrado no backend');
@@ -545,13 +602,16 @@ const Products = {
             // Cache the products
             localStorage.setItem('cachedProducts', JSON.stringify(products));
             localStorage.setItem('productsCacheTimestamp', now.toString());
+            console.log('💾 Produtos salvos no cache');
             
             STATE.products = products;
             this.renderProducts(products);
             Utils.showNotification(`${products.length} produtos carregados!`, 'success');
             
         } catch (error) {
-            console.error('❌ Erro ao carregar produtos:', error);
+            console.error('❌ Erro detalhado ao carregar produtos:', error);
+            console.error('❌ Tipo do erro:', error.name);
+            console.error('❌ Mensagem do erro:', error.message);
             
             // Try to use cached data if available, even if expired
             const cachedProducts = localStorage.getItem('cachedProducts');
@@ -567,7 +627,7 @@ const Products = {
             if (error.name === 'AbortError') {
                 Utils.showNotification('Timeout ao carregar produtos (3s)', 'error');
             } else {
-                Utils.showNotification('Erro ao carregar produtos do backend', 'error');
+                Utils.showNotification(`Erro ao carregar produtos: ${error.message}`, 'error');
             }
             
             // Show loading error state
@@ -578,6 +638,7 @@ const Products = {
                         <i class="fas fa-exclamation-triangle"></i>
                         <h3>Erro ao carregar produtos</h3>
                         <p>Não foi possível conectar com o backend.</p>
+                        <p><strong>Erro:</strong> ${error.message}</p>
                         <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
                             <button class="btn btn-primary" onclick="Products.loadProducts()">
                                 <i class="fas fa-refresh"></i> Tentar Novamente
@@ -812,10 +873,10 @@ const Forms = {
 // ===== LOADING SCREEN =====
 const LoadingScreen = {
     init() {
-        // Force hide loading screen after 2 seconds regardless of what happens
+        // Force hide loading screen after 1 second regardless of what happens
         setTimeout(() => {
             this.hide();
-        }, 2000);
+        }, 1000);
     },
 
     show() {
