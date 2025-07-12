@@ -812,8 +812,7 @@ const Forms = {
 // ===== LOADING SCREEN =====
 const LoadingScreen = {
     init() {
-        // Show loading screen for 2 seconds
-        this.show();
+        // Force hide loading screen after 2 seconds regardless of what happens
         setTimeout(() => {
             this.hide();
         }, 2000);
@@ -841,7 +840,8 @@ const LoadingScreen = {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🍔 BurgerHouse - Inicializando...');
     
-    // Initialize loading screen with 2 second delay
+    // Show loading screen and force hide after 2 seconds
+    LoadingScreen.show();
     LoadingScreen.init();
     
     // Initialize all modules

@@ -389,5 +389,21 @@
 
     <!-- JavaScript -->
     <script src="assets/js/script.js"></script>
+    
+    <!-- Fallback: Force hide loading screen after 2 seconds -->
+    <script>
+        // Emergency fallback to hide loading screen
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) {
+                loadingScreen.style.display = 'none';
+                loadingScreen.classList.add('hidden');
+            }
+            
+            // Ensure main content is visible
+            document.body.style.visibility = 'visible';
+            document.body.style.opacity = '1';
+        }, 2000);
+    </script>
 </body>
 </html> 
