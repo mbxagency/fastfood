@@ -29,10 +29,10 @@ Sistema completo de autoatendimento para restaurantes fast food, desenvolvido co
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │    Backend      │    │   Database      │
-│   (Vercel)      │◄──►│   (Render)      │◄──►│  (Supabase)     │
+│   (Vercel)      │◄──►│   (Render)      │◄──►│  (Render)       │
 │                 │    │                 │    │                 │
 │ • HTML/CSS/JS   │    │ • FastAPI       │    │ • PostgreSQL    │
-│ • Responsive    │    │ • Hexagonal     │    │ • Real-time     │
+│ • Responsive    │    │ • Hexagonal     │    │ • Managed       │
 │ • PWA Ready     │    │ • Clean Code    │    │ • Backups       │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
@@ -47,7 +47,7 @@ Sistema completo de autoatendimento para restaurantes fast food, desenvolvido co
 
 ### **Backend**
 - **Framework**: FastAPI (Python 3.11)
-- **Database**: PostgreSQL (Supabase)
+- **Database**: PostgreSQL (Render)
 - **ORM**: SQLAlchemy + Alembic
 - **Auth**: JWT
 - **Validation**: Pydantic
@@ -62,7 +62,7 @@ Sistema completo de autoatendimento para restaurantes fast food, desenvolvido co
 ### **Infrastructure**
 - **Frontend Host**: Vercel
 - **Backend Host**: Render
-- **Database**: Supabase
+- **Database**: Render PostgreSQL
 - **Container**: Docker
 - **CI/CD**: GitHub Actions (opcional)
 
@@ -189,8 +189,8 @@ make dev
 ## 📈 Monitoramento
 
 - **Vercel**: Analytics e performance do frontend
-- **Render**: Logs e métricas do backend
-- **Supabase**: Queries e storage do banco
+- **Render**: Logs e métricas do backend e database
+- **Render PostgreSQL**: Queries e storage do banco
 
 ## 🤝 Contribuição
 
@@ -208,7 +208,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 - **Desenvolvimento**: [Seu Nome]
 - **Arquitetura**: Clean Architecture + Hexagonal
-- **Deploy**: Vercel + Render + Supabase
+- **Deploy**: Vercel + Render
 
 ## 📞 Suporte
 

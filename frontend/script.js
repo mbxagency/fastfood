@@ -184,7 +184,7 @@ function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card fade-in';
     
-    // Use API data from Supabase
+    // Use API data from Render PostgreSQL
     const name = product.nome;
     const description = product.descricao;
     const price = product.preco;
