@@ -7,6 +7,7 @@ Uses environment variables from Render
 import os
 import sys
 import time
+import uuid
 from pathlib import Path
 
 # Add the src directory to the Python path
@@ -85,42 +86,42 @@ def populate_products():
         # SQL para inserir produtos (com ou sem ON CONFLICT baseado na constraint)
         if has_unique_constraint:
             print("✅ Constraint única encontrada, usando ON CONFLICT")
-            produtos_sql = """
-            INSERT INTO tb_produtos (nome, categoria, preco) VALUES
-            ('Hambúrguer Clássico', 'burgers', 15.90),
-            ('Hambúrguer Duplo', 'burgers', 22.50),
-            ('X-Bacon', 'burgers', 18.90),
-            ('X-Salada', 'burgers', 16.90),
-            ('X-Frango', 'burgers', 17.90),
-            ('Refrigerante Cola', 'drinks', 5.00),
-            ('Suco Natural', 'drinks', 6.50),
-            ('Água Mineral', 'drinks', 3.50),
-            ('Batata Frita', 'sides', 8.50),
-            ('Onion Rings', 'sides', 7.90),
-            ('Nuggets', 'sides', 9.90),
-            ('Sorvete de Chocolate', 'desserts', 4.50),
-            ('Pudim', 'desserts', 5.90),
-            ('Milk Shake', 'desserts', 12.90)
+            produtos_sql = f"""
+            INSERT INTO tb_produtos (id, nome, categoria, preco) VALUES
+            ('{uuid.uuid4()}', 'Hambúrguer Clássico', 'burgers', 15.90),
+            ('{uuid.uuid4()}', 'Hambúrguer Duplo', 'burgers', 22.50),
+            ('{uuid.uuid4()}', 'X-Bacon', 'burgers', 18.90),
+            ('{uuid.uuid4()}', 'X-Salada', 'burgers', 16.90),
+            ('{uuid.uuid4()}', 'X-Frango', 'burgers', 17.90),
+            ('{uuid.uuid4()}', 'Refrigerante Cola', 'drinks', 5.00),
+            ('{uuid.uuid4()}', 'Suco Natural', 'drinks', 6.50),
+            ('{uuid.uuid4()}', 'Água Mineral', 'drinks', 3.50),
+            ('{uuid.uuid4()}', 'Batata Frita', 'sides', 8.50),
+            ('{uuid.uuid4()}', 'Onion Rings', 'sides', 7.90),
+            ('{uuid.uuid4()}', 'Nuggets', 'sides', 9.90),
+            ('{uuid.uuid4()}', 'Sorvete de Chocolate', 'desserts', 4.50),
+            ('{uuid.uuid4()}', 'Pudim', 'desserts', 5.90),
+            ('{uuid.uuid4()}', 'Milk Shake', 'desserts', 12.90)
             ON CONFLICT (nome) DO NOTHING;
             """
         else:
             print("⚠️ Constraint única não encontrada, inserindo sem ON CONFLICT")
-            produtos_sql = """
-            INSERT INTO tb_produtos (nome, categoria, preco) VALUES
-            ('Hambúrguer Clássico', 'burgers', 15.90),
-            ('Hambúrguer Duplo', 'burgers', 22.50),
-            ('X-Bacon', 'burgers', 18.90),
-            ('X-Salada', 'burgers', 16.90),
-            ('X-Frango', 'burgers', 17.90),
-            ('Refrigerante Cola', 'drinks', 5.00),
-            ('Suco Natural', 'drinks', 6.50),
-            ('Água Mineral', 'drinks', 3.50),
-            ('Batata Frita', 'sides', 8.50),
-            ('Onion Rings', 'sides', 7.90),
-            ('Nuggets', 'sides', 9.90),
-            ('Sorvete de Chocolate', 'desserts', 4.50),
-            ('Pudim', 'desserts', 5.90),
-            ('Milk Shake', 'desserts', 12.90);
+            produtos_sql = f"""
+            INSERT INTO tb_produtos (id, nome, categoria, preco) VALUES
+            ('{uuid.uuid4()}', 'Hambúrguer Clássico', 'burgers', 15.90),
+            ('{uuid.uuid4()}', 'Hambúrguer Duplo', 'burgers', 22.50),
+            ('{uuid.uuid4()}', 'X-Bacon', 'burgers', 18.90),
+            ('{uuid.uuid4()}', 'X-Salada', 'burgers', 16.90),
+            ('{uuid.uuid4()}', 'X-Frango', 'burgers', 17.90),
+            ('{uuid.uuid4()}', 'Refrigerante Cola', 'drinks', 5.00),
+            ('{uuid.uuid4()}', 'Suco Natural', 'drinks', 6.50),
+            ('{uuid.uuid4()}', 'Água Mineral', 'drinks', 3.50),
+            ('{uuid.uuid4()}', 'Batata Frita', 'sides', 8.50),
+            ('{uuid.uuid4()}', 'Onion Rings', 'sides', 7.90),
+            ('{uuid.uuid4()}', 'Nuggets', 'sides', 9.90),
+            ('{uuid.uuid4()}', 'Sorvete de Chocolate', 'desserts', 4.50),
+            ('{uuid.uuid4()}', 'Pudim', 'desserts', 5.90),
+            ('{uuid.uuid4()}', 'Milk Shake', 'desserts', 12.90);
             """
         
         with engine.connect() as conn:
