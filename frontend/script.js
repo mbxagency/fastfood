@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = process.env.API_URL || 'http://localhost:8000';
+const API_BASE_URL = 'https://fastfood-api.railway.app' || 'http://localhost:8000';
 
 // Mock data for products (fallback)
 const products = [
@@ -74,6 +74,30 @@ const products = [
         price: 5.90,
         category: "desserts",
         icon: "fas fa-cookie-bite"
+    },
+    {
+        id: 10,
+        name: "X-Salada",
+        description: "Hambúrguer com salada completa",
+        price: 16.90,
+        category: "burgers",
+        icon: "fas fa-hamburger"
+    },
+    {
+        id: 11,
+        name: "Água",
+        description: "Água mineral com ou sem gás",
+        price: 3.50,
+        category: "drinks",
+        icon: "fas fa-tint"
+    },
+    {
+        id: 12,
+        name: "Nuggets",
+        description: "6 unidades de nuggets de frango",
+        price: 9.90,
+        category: "sides",
+        icon: "fas fa-drumstick-bite"
     }
 ];
 
@@ -93,18 +117,30 @@ const filterBtns = document.querySelectorAll('.filter-btn');
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
-    loadProductsFromAPI();
+    console.log('🚀 FastFood iniciando...');
+    loadProducts(); // Carrega dados mock primeiro
     setupEventListeners();
     updateCartDisplay();
+    
+    // Tenta carregar da API em background
+    setTimeout(() => {
+        loadProductsFromAPI();
+    }, 1000);
 });
 
 // Setup event listeners
 function setupEventListeners() {
     // Cart button
-    document.getElementById('cartBtn').addEventListener('click', openCart);
+    const cartBtn = document.getElementById('cartBtn');
+    if (cartBtn) {
+        cartBtn.addEventListener('click', openCart);
+    }
     
     // Login button
-    document.getElementById('loginBtn').addEventListener('click', openLogin);
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', openLogin);
+    }
     
     // Modal close buttons
     document.querySelectorAll('.modal-close').forEach(btn => {
@@ -145,33 +181,49 @@ function setupEventListeners() {
             }
         });
     });
+    
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    if (mobileMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', function() {
+            mobileMenu.classList.toggle('active');
+        });
+    }
 }
 
-// Load products from API
+// Load products from API (background)
 async function loadProductsFromAPI() {
     try {
+        console.log('🔗 Tentando carregar produtos da API...');
         const response = await fetch(`${API_BASE_URL}/v1/api/public/produtos`);
         if (response.ok) {
             apiProducts = await response.json();
-            loadProducts();
+            console.log('✅ Produtos carregados da API:', apiProducts.length);
+            loadProducts(); // Recarrega com dados da API
         } else {
-            console.warn('API não disponível, usando dados mock');
-            loadProducts();
+            console.warn('⚠️ API não disponível, usando dados mock');
         }
     } catch (error) {
-        console.warn('Erro ao carregar produtos da API:', error);
-        loadProducts();
+        console.warn('⚠️ Erro ao carregar produtos da API:', error);
     }
 }
 
 // Load products
 function loadProducts() {
+    if (!menuGrid) {
+        console.error('❌ Elemento menuGrid não encontrado');
+        return;
+    }
+    
     menuGrid.innerHTML = '';
     
     const productsToShow = apiProducts.length > 0 ? apiProducts : products;
     const filteredProducts = currentCategory === 'all' 
         ? productsToShow 
         : productsToShow.filter(product => product.category === currentCategory);
+    
+    console.log(`📦 Carregando ${filteredProducts.length} produtos para categoria: ${currentCategory}`);
     
     filteredProducts.forEach(product => {
         const productCard = createProductCard(product);
@@ -201,7 +253,7 @@ function createProductCard(product) {
                 <span class="product-price">R$ ${price.toFixed(2)}</span>
                 <button class="btn btn-primary" onclick="addToCart(${product.id})">
                     <i class="fas fa-plus"></i>
-                    Adicionar
+                    <span class="btn-text">Adicionar</span>
                 </button>
             </div>
         </div>
@@ -255,40 +307,44 @@ function updateQuantity(productId, change) {
 function updateCartDisplay() {
     // Update cart count
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartCount.textContent = totalItems;
+    if (cartCount) {
+        cartCount.textContent = totalItems;
+    }
     
     // Update cart items
-    cartItems.innerHTML = '';
-    
-    if (cart.length === 0) {
-        cartItems.innerHTML = '<p style="text-align: center; color: #64748b;">Seu carrinho está vazio</p>';
-    } else {
-        cart.forEach(item => {
-            const cartItem = document.createElement('div');
-            cartItem.className = 'cart-item';
-            
-            const name = item.nome || item.name;
-            const price = item.preco || item.price;
-            
-            cartItem.innerHTML = `
-                <div class="cart-item-info">
-                    <div class="cart-item-title">${name}</div>
-                    <div class="cart-item-price">R$ ${price.toFixed(2)}</div>
-                </div>
-                <div class="cart-item-actions">
-                    <div class="cart-item-quantity">
-                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
-                        <span>${item.quantity}</span>
-                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+    if (cartItems) {
+        cartItems.innerHTML = '';
+        
+        if (cart.length === 0) {
+            cartItems.innerHTML = '<p style="text-align: center; color: #64748b;">Seu carrinho está vazio</p>';
+        } else {
+            cart.forEach(item => {
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                
+                const name = item.nome || item.name;
+                const price = item.preco || item.price;
+                
+                cartItem.innerHTML = `
+                    <div class="cart-item-info">
+                        <div class="cart-item-title">${name}</div>
+                        <div class="cart-item-price">R$ ${price.toFixed(2)}</div>
                     </div>
-                    <button class="btn btn-outline" onclick="removeFromCart(${item.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
-            
-            cartItems.appendChild(cartItem);
-        });
+                    <div class="cart-item-actions">
+                        <div class="cart-item-quantity">
+                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                        </div>
+                        <button class="btn btn-outline" onclick="removeFromCart(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                cartItems.appendChild(cartItem);
+            });
+        }
     }
     
     // Update total
@@ -296,28 +352,39 @@ function updateCartDisplay() {
         const price = item.preco || item.price;
         return sum + (price * item.quantity);
     }, 0);
-    cartTotal.textContent = total.toFixed(2);
+    
+    if (cartTotal) {
+        cartTotal.textContent = total.toFixed(2);
+    }
 }
 
 // Modal functions
 function openCart() {
-    cartModal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    if (cartModal) {
+        cartModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeCart() {
-    cartModal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+    if (cartModal) {
+        cartModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 }
 
 function openLogin() {
-    loginModal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    if (loginModal) {
+        loginModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeLogin() {
-    loginModal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+    if (loginModal) {
+        loginModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 }
 
 // Checkout function
@@ -394,6 +461,8 @@ function showNotification(message, type = 'success') {
         align-items: center;
         gap: 0.5rem;
         animation: slideIn 0.3s ease-out;
+        max-width: 300px;
+        font-size: 14px;
     `;
     
     document.body.appendChild(notification);
@@ -402,17 +471,22 @@ function showNotification(message, type = 'success') {
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease-out';
         setTimeout(() => {
-            document.body.removeChild(notification);
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
         }, 300);
     }, 3000);
 }
 
 // Navigation functions
 function scrollToMenu() {
-    document.getElementById('menu').scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-    });
+    const menuSection = document.getElementById('menu');
+    if (menuSection) {
+        menuSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
 }
 
 function showDemo() {
@@ -459,6 +533,14 @@ style.textContent = `
     
     .notification {
         font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+        .notification {
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
     }
 `;
 document.head.appendChild(style);
