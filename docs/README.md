@@ -40,8 +40,8 @@ fastfood/
 
 - **Backend**: FastAPI, Python 3.11, PostgreSQL
 - **Frontend**: HTML5, CSS3, JavaScript
-- **Database**: Supabase PostgreSQL
-- **Deploy**: Vercel (Frontend) + Railway (Backend)
+- **Database**: Render PostgreSQL
+- **Deploy**: Vercel (Frontend) + Render (Backend + Database)
 - **Container**: Docker
 - **Orquestração**: Kubernetes (opcional)
 

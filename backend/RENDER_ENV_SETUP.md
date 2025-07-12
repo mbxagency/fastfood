@@ -22,6 +22,10 @@ SECRET_KEY=fastfood-secret-key-2025-change-in-production
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
+# Admin Authentication
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
+
 # Environment
 ENVIRONMENT=production
 DEBUG=false
@@ -59,6 +63,8 @@ LOG_LEVEL=INFO
    - `SECRET_KEY`
    - `ALGORITHM`
    - `ACCESS_TOKEN_EXPIRE_MINUTES`
+   - `ADMIN_USERNAME`
+   - `ADMIN_PASSWORD`
    - `ENVIRONMENT`
    - `DEBUG`
    - `CORS_ALLOW_ORIGINS`
@@ -85,12 +91,17 @@ LOG_LEVEL=INFO
 - Acesse: `https://seu-app.onrender.com/docs`
 - Deve mostrar a documentação Swagger
 
+### **4. Teste o Login Admin**
+- Use as credenciais configuradas em `ADMIN_USERNAME` e `ADMIN_PASSWORD`
+- Teste o endpoint `/v1/api/public/login`
+
 ## ⚠️ Importante
 
 - **Nunca commite** as credenciais no Git
 - Use sempre variáveis de ambiente
 - O arquivo `.env` está no `.gitignore`
 - As credenciais do banco são sensíveis
+- **Altere as credenciais de admin** em produção
 
 ## 🆘 Troubleshooting
 
@@ -106,6 +117,10 @@ LOG_LEVEL=INFO
 ### **Erro de Build:**
 1. Verifique se todas as dependências estão no `requirements.txt`
 2. Confirme se o `Dockerfile` está correto
+
+### **Erro de Autenticação:**
+1. Verifique se `ADMIN_USERNAME` e `ADMIN_PASSWORD` estão configurados
+2. Teste o login com as credenciais corretas
 
 ## 📞 Suporte
 

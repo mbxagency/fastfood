@@ -1,18 +1,17 @@
 # 🚀 Guia de Deploy - FastFood
 
-Guia completo para fazer deploy do sistema FastFood usando Vercel (Frontend) e Render (Backend).
+Guia completo para fazer deploy do sistema FastFood usando Vercel (Frontend) e Render (Backend + Database).
 
 ## 📋 Arquitetura de Deploy
 
 ```
-Frontend (Vercel) → Backend (Render) → Database (Supabase)
+Frontend (Vercel) → Backend (Render) → Database (Render PostgreSQL)
 ```
 
 ## 🎯 Pré-requisitos
 
 - ✅ Conta na [Vercel](https://vercel.com)
 - ✅ Conta no [Render](https://render.com)
-- ✅ Conta no [Supabase](https://supabase.com) (já configurado)
 - ✅ Repositório no GitHub
 
 ## 🚀 Deploy do Backend (Render)
@@ -47,13 +46,13 @@ No Render, configure:
 No Render, vá em **Environment** e adicione:
 
 ```env
-DATABASE_URL=postgresql://postgres.cpntprlstlhubeivkpzq:postech_fiap_2025@aws-0-us-east-2.pooler.supabase.com:6543/postgres
+DATABASE_URL=postgresql://postech:lqIYZ8F3PcPCQBxeViQUbJZh0fw6dRDN@dpg-d1p7s4juibrs73dfuceg-a.ohio-postgres.render.com:5432/fastfood_vi5x
 SECRET_KEY=fastfood-secret-key-2025-change-in-production
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ENVIRONMENT=production
 DEBUG=false
-CORS_ALLOW_ORIGINS=https://fastfood-murex.vercel.app,https://fastfood-git-main-mbxagencycwb-9232s-projects.vercel.app,https://fastfood-c2s784n7q-mbxagencycwb-9232s-projects.vercel.app
+CORS_ALLOW_ORIGINS=https://fastfood-murex.vercel.app
 API_PREFIX=/v1
 PROJECT_NAME=FastFood API
 VERSION=1.0.0
@@ -120,7 +119,7 @@ O Render fará health checks automáticos no endpoint `/health`.
 
 - **Vercel**: Analytics e logs no dashboard
 - **Render**: Logs no dashboard do projeto
-- **Supabase**: Logs no dashboard do projeto
+- **Render PostgreSQL**: Logs no dashboard do banco
 
 ## 🧪 Testando o Deploy
 
@@ -179,10 +178,10 @@ jobs:
 - Métricas de performance
 - Uptime monitoring
 
-### **Supabase Dashboard**
+### **Render PostgreSQL Dashboard**
 - Queries e performance
 - Storage usage
-- Real-time subscriptions
+- Database metrics
 
 ## 🚨 Troubleshooting
 
@@ -193,45 +192,8 @@ jobs:
 
 2. **Database Connection**
    - Verifique se a variável `DATABASE_URL` está configurada corretamente
-   - Teste a conexão com o Supabase
+   - Teste a conexão com o Render PostgreSQL
 
 3. **Build Failures**
    - Verifique os logs no Render
-   - Teste localmente primeiro
-
-### **Comandos Úteis**
-
-```bash
-# Testar backend localmente
-cd backend
-python -m uvicorn src.main:app --reload
-
-# Testar frontend localmente
-cd frontend
-python -m http.server 3000
-
-# Verificar logs
-render logs
-```
-
-## 🎉 URLs Finais
-
-Após o deploy, você terá:
-
-- **Frontend**: `https://fastfood-murex.vercel.app`
-- **Backend**: `https://fastfood-api.onrender.com`
-- **Database**: Supabase (já configurado)
-- **Docs**: `https://fastfood-api.onrender.com/docs`
-
-## 📈 Próximos Passos
-
-1. **Configurar domínio customizado**
-2. **Implementar CI/CD completo**
-3. **Adicionar monitoramento avançado**
-4. **Configurar backups automáticos**
-5. **Implementar rate limiting**
-6. **Adicionar autenticação JWT**
-
----
-
-**🎯 Sistema pronto para produção!** 
+   - Teste localmente primeiro 

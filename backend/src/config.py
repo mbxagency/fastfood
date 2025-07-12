@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
+    # Admin Authentication
+    ADMIN_USERNAME: str = os.getenv("ADMIN_USERNAME", "admin")
+    ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin123")
+    
     # Environment
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     DEBUG: bool = os.getenv("DEBUG", "true").lower() == "true"
@@ -29,6 +33,25 @@ class Settings(BaseSettings):
     
     # Logging
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Validate DATABASE_URL
+        self._validate_database_url()
+    
+    def _validate_database_url(self):
+        """Validate DATABASE_URL format"""
+        if self.DATABASE_URL.startswith("DATABASE_URL="):
+            raise ValueError(
+                f"Invalid DATABASE_URL format. Got: {self.DATABASE_URL}\n"
+                "Expected: postgresql://user:pass@host:port/db\n"
+                "Make sure the environment variable is set correctly in Render."
+            )
+        
+        if not self.DATABASE_URL.startswith("postgresql://"):
+            raise ValueError(
+                f"Invalid DATABASE_URL. Must start with 'postgresql://'. Got: {self.DATABASE_URL}"
+            )
     
     @property
     def CORS_ALLOW_ORIGINS(self) -> List[str]:

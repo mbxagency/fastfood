@@ -14,7 +14,7 @@
 - ✅ Validação com Pydantic
 - ✅ ORM SQLAlchemy
 - ✅ Migrações Alembic
-- ✅ Conexão Supabase PostgreSQL
+- ✅ Conexão Render PostgreSQL
 - ✅ Health check endpoint
 - ✅ Documentação automática (Swagger)
 
@@ -29,6 +29,7 @@
 ### **🚀 Deploy**
 - ✅ Configuração Vercel (Frontend)
 - ✅ Configuração Render (Backend)
+- ✅ Configuração Render PostgreSQL (Database)
 - ✅ Docker containerizado
 - ✅ Scripts de automação
 - ✅ Variáveis de ambiente
@@ -77,7 +78,7 @@
 
 ### **Backend**
 - **Framework**: FastAPI (Python 3.11)
-- **Database**: PostgreSQL (Supabase)
+- **Database**: PostgreSQL (Render)
 - **ORM**: SQLAlchemy + Alembic
 - **Auth**: JWT
 - **Validation**: Pydantic
@@ -91,7 +92,7 @@
 
 ### **Infrastructure**
 - **Backend Host**: Render
-- **Database**: Supabase
+- **Database**: Render PostgreSQL
 - **CI/CD**: GitHub Actions (opcional)
 
 ## 📈 **Métricas**
@@ -105,19 +106,19 @@
 ### **Funcionalidades**
 - **Endpoints API**: 15+
 - **Páginas Frontend**: 6 seções
-- **Integrações**: 3 (Vercel, Render, Supabase)
+- **Integrações**: 2 (Vercel, Render)
 
 ## 🎉 **Deploy Status**
 
 ### **Ambiente de Produção**
-- ✅ **Frontend**: https://fastfood.vercel.app
+- ✅ **Frontend**: https://fastfood-murex.vercel.app
 - ✅ **Backend**: https://fastfood-api.onrender.com
-- ✅ **Database**: Supabase PostgreSQL
+- ✅ **Database**: Render PostgreSQL
 - ✅ **Docs**: https://fastfood-api.onrender.com/docs
 
 ### **Ambiente de Desenvolvimento**
 - ✅ **Local**: http://localhost:8000
-- ✅ **Database**: Supabase (dev)
+- ✅ **Database**: Render PostgreSQL (dev)
 - ✅ **Hot Reload**: Configurado
 
 ## 🔧 **Comandos Principais**
