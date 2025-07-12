@@ -43,7 +43,6 @@
       ]
     }
   ],
-  "functions": {},
   "env": {
     "API_URL": "https://fastfood-api.onrender.com"
   }
