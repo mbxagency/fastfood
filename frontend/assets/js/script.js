@@ -501,12 +501,35 @@ const AdminPanel = {
 const Products = {
     async loadProducts() {
         try {
+            console.log('🔄 Carregando produtos do backend...');
             const products = await API.getProducts();
+            console.log('📦 Produtos carregados:', products);
+            
+            if (!products || products.length === 0) {
+                throw new Error('Nenhum produto encontrado no backend');
+            }
+            
             STATE.products = products;
             this.renderProducts(products);
+            Utils.showNotification(`${products.length} produtos carregados!`, 'success');
         } catch (error) {
-            console.error('Error loading products:', error);
-            Utils.showNotification('Erro ao carregar produtos', 'error');
+            console.error('❌ Erro ao carregar produtos:', error);
+            Utils.showNotification('Erro ao carregar produtos do backend', 'error');
+            
+            // Show loading error state
+            const productsGrid = document.getElementById('productsGrid');
+            if (productsGrid) {
+                productsGrid.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar produtos</h3>
+                        <p>Não foi possível conectar com o backend.</p>
+                        <button class="btn btn-primary" onclick="Products.loadProducts()">
+                            <i class="fas fa-refresh"></i> Tentar Novamente
+                        </button>
+                    </div>
+                `;
+            }
         }
     },
 
@@ -516,7 +539,7 @@ const Products = {
         if (!productsGrid) return;
         
         productsGrid.innerHTML = products.length === 0 
-            ? '<p class="no-products">Nenhum produto encontrado</p>'
+            ? '<p class="no-products">Nenhum produto encontrado no backend</p>'
             : products.map(product => `
                 <div class="product-card">
                     <div class="product-image">
@@ -719,17 +742,17 @@ const Forms = {
 // ===== LOADING SCREEN =====
 const LoadingScreen = {
     init() {
+        // Hide loading screen immediately if no API calls are needed
         this.hide();
     },
 
     show() {
-        document.getElementById('loadingScreen').classList.remove('hidden');
+        document.getElementById('loadingScreen')?.classList.remove('hidden');
     },
 
     hide() {
-        setTimeout(() => {
-            document.getElementById('loadingScreen').classList.add('hidden');
-        }, 2000);
+        // Remove timeout and hide immediately
+        document.getElementById('loadingScreen')?.classList.add('hidden');
     }
 };
 
@@ -737,18 +760,28 @@ const LoadingScreen = {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🍔 BurgerHouse - Inicializando...');
     
-    // Initialize all modules
+    // Initialize all modules immediately
     LoadingScreen.init();
     Navigation.init();
     CartSidebar.init();
     AdminPanel.init();
     Forms.init();
-    
-    // Load initial data
-    await Products.loadProducts();
     Cart.loadFromStorage();
     
-    // Hide loading screen
+    // Load products from backend with timeout
+    try {
+        await Promise.race([
+            Products.loadProducts(),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout ao carregar produtos')), 10000)
+            )
+        ]);
+    } catch (error) {
+        console.error('❌ Erro na inicialização:', error);
+        Utils.showNotification('Erro ao conectar com o backend', 'error');
+    }
+    
+    // Hide loading screen immediately
     LoadingScreen.hide();
     
     console.log('✅ BurgerHouse - Inicializado com sucesso!');

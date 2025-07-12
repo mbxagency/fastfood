@@ -32,6 +32,21 @@ app.add_middleware(
     allow_headers=settings.CORS_ALLOW_HEADERS,
 )
 
+@app.get("/")
+def root():
+    """Rota raiz da API"""
+    return {
+        "message": "🍔 BurgerHouse API",
+        "version": settings.API_VERSION,
+        "status": "online",
+        "docs": "/docs",
+        "health": "/health",
+        "endpoints": {
+            "public": "/api/public",
+            "admin": "/api/admin"
+        }
+    }
+
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "version": settings.API_VERSION}
