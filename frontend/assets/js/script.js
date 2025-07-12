@@ -766,17 +766,24 @@ const Forms = {
 // ===== LOADING SCREEN =====
 const LoadingScreen = {
     init() {
-        // Hide loading screen immediately if no API calls are needed
+        // Force hide loading screen immediately
         this.hide();
     },
 
     show() {
-        document.getElementById('loadingScreen')?.classList.remove('hidden');
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.classList.remove('hidden');
+        }
     },
 
     hide() {
-        // Remove timeout and hide immediately
-        document.getElementById('loadingScreen')?.classList.add('hidden');
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.classList.add('hidden');
+            // Force hide with inline styles as backup
+            loadingScreen.style.display = 'none';
+        }
     }
 };
 
@@ -784,16 +791,19 @@ const LoadingScreen = {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🍔 BurgerHouse - Inicializando...');
     
-    // Initialize all modules immediately
-    LoadingScreen.init();
-    Navigation.init();
-    CartSidebar.init();
-    AdminPanel.init();
-    Forms.init();
-    Cart.loadFromStorage();
-    
-    // Hide loading screen immediately
+    // Force hide loading screen first
     LoadingScreen.hide();
+    
+    // Initialize all modules
+    try {
+        Navigation.init();
+        CartSidebar.init();
+        AdminPanel.init();
+        Forms.init();
+        Cart.loadFromStorage();
+    } catch (error) {
+        console.error('Erro ao inicializar módulos:', error);
+    }
     
     // Load products in background (non-blocking)
     setTimeout(() => {
@@ -801,10 +811,15 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('❌ Erro ao carregar produtos:', error);
             Utils.showNotification('Erro ao carregar produtos do backend', 'error');
         });
-    }, 100);
+    }, 500);
     
     console.log('✅ BurgerHouse - Inicializado com sucesso!');
 });
+
+// Fallback: Hide loading screen after 3 seconds maximum
+setTimeout(() => {
+    LoadingScreen.hide();
+}, 3000);
 
 // ===== GLOBAL FUNCTIONS =====
 window.Cart = Cart;

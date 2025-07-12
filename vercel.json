@@ -3,7 +3,7 @@
   "name": "fastfood-frontend",
   "builds": [
     {
-      "src": "frontend/**",
+      "src": "frontend/index.html",
       "use": "@vercel/static"
     }
   ],
@@ -13,9 +13,5 @@
       "dest": "/frontend/$1"
     }
   ],
-  "env": {
-    "API_URL": "https://fastfood-api.onrender.com"
-  },
-  "regions": ["gru1"],
-  "public": true
+  "regions": ["gru1"]
 } 

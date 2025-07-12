@@ -401,5 +401,17 @@
 
     <!-- JavaScript -->
     <script src="assets/js/script.js"></script>
+    
+    <!-- Fallback: Hide loading screen if JavaScript fails -->
+    <script>
+        // Emergency fallback to hide loading screen
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) {
+                loadingScreen.style.display = 'none';
+                loadingScreen.classList.add('hidden');
+            }
+        }, 2000);
+    </script>
 </body>
 </html> 
