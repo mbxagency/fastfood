@@ -13,7 +13,7 @@ const CONFIG = {
     },
     ADMIN_CREDENTIALS: {
         USERNAME: process.env.ADMIN_USERNAME || 'admin',
-        PASSWORD: process.env.ADMIN_PASSWORD || 'admin123'
+        PASSWORD: process.env.ADMIN_PASSWORD || 'postech'
     }
 };
 
