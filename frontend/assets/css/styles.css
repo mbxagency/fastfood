@@ -58,12 +58,28 @@ body {
     color: var(--dark-gray);
     background-color: var(--white);
     overflow-x: hidden;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Ensure all content is visible */
+.header,
+.hero,
+.menu,
+.about,
+.contact,
+.footer {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 var(--spacing-sm);
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 /* ===== LOADING SCREEN ===== */

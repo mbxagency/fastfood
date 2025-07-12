@@ -1,9 +1,8 @@
 {
   "version": 2,
-  "name": "fastfood-frontend",
   "builds": [
     {
-      "src": "frontend/index.html",
+      "src": "frontend/**",
       "use": "@vercel/static"
     }
   ],
@@ -12,6 +11,5 @@
       "src": "/(.*)",
       "dest": "/frontend/$1"
     }
-  ],
-  "regions": ["gru1"]
+  ]
 } 

@@ -383,18 +383,6 @@
                         <li><a href="#menu" data-category="desserts">Sobremesas</a></li>
                     </ul>
                 </div>
-                <div class="footer-section">
-                    <h4>Horário de Funcionamento</h4>
-                    <ul>
-                        <li>Segunda a Sexta: 11h - 23h</li>
-                        <li>Sábado: 11h - 00h</li>
-                        <li>Domingo: 12h - 22h</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 BurgerHouse. Todos os direitos reservados.</p>
-                <p>Desenvolvido com <i class="fas fa-heart"></i> para você</p>
             </div>
         </div>
     </footer>
@@ -402,16 +390,37 @@
     <!-- JavaScript -->
     <script src="assets/js/script.js"></script>
     
-    <!-- Fallback: Hide loading screen if JavaScript fails -->
+    <!-- Fallback: Hide loading screen and ensure page loads -->
     <script>
-        // Emergency fallback to hide loading screen
+        // Emergency fallback to hide loading screen and show content
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide loading screen immediately
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) {
+                loadingScreen.style.display = 'none';
+                loadingScreen.classList.add('hidden');
+            }
+            
+            // Ensure main content is visible
+            const mainContent = document.querySelector('body');
+            if (mainContent) {
+                mainContent.style.visibility = 'visible';
+                mainContent.style.opacity = '1';
+            }
+        });
+        
+        // Fallback timeout
         setTimeout(() => {
             const loadingScreen = document.getElementById('loadingScreen');
             if (loadingScreen) {
                 loadingScreen.style.display = 'none';
                 loadingScreen.classList.add('hidden');
             }
-        }, 2000);
+            
+            // Force show all content
+            document.body.style.visibility = 'visible';
+            document.body.style.opacity = '1';
+        }, 1000);
     </script>
 </body>
 </html> 
