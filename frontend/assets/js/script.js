@@ -5,7 +5,7 @@ const CONFIG = {
         PRODUCTS: '/v1/api/public/produtos',
         ORDERS: '/v1/api/public/pedidos',
         CUSTOMERS: '/v1/api/public/clientes',
-        PAYMENTS: '/v1/api/public/pagamentos',
+        PAYMENTS: '/v1/api/public/pagamento',
         ADMIN_LOGIN: '/v1/api/public/login',
         ADMIN_ORDERS: '/v1/api/admin/pedidos',
         ADMIN_PRODUCTS: '/v1/api/admin/produtos',
