@@ -120,6 +120,15 @@ const API = {
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('🌐 API Error response:', errorText);
+                
+                // Se for erro 403, pode ser problema de autenticação
+                if (response.status === 403) {
+                    console.log('🔑 Erro 403 - Removendo token inválido');
+                    localStorage.removeItem('adminToken');
+                    STATE.adminToken = null;
+                    STATE.isAdmin = false;
+                }
+                
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
@@ -129,6 +138,12 @@ const API = {
         } catch (error) {
             console.error('❌ API Error:', error);
             console.error('❌ API Error details:', { url, config, error: error.message });
+            
+            // Se for erro de CORS, mostrar mensagem específica
+            if (error.message.includes('Failed to fetch')) {
+                throw new Error('Erro de conexão com o servidor. Verifique sua conexão com a internet.');
+            }
+            
             throw error;
         }
     },
@@ -153,6 +168,10 @@ const API = {
 
     async getOrders() {
         return await this.request(CONFIG.ENDPOINTS.ADMIN_ORDERS);
+    },
+
+    async getPublicOrders() {
+        return await this.request(CONFIG.ENDPOINTS.ORDERS);
     },
 
     async getCustomers() {
@@ -386,7 +405,11 @@ const AdminPanel = {
         if (token) {
             STATE.adminToken = token;
             STATE.isAdmin = true;
+            console.log('🔑 Token carregado do localStorage:', token.substring(0, 20) + '...');
+            return true;
         }
+        console.log('🔑 Nenhum token encontrado no localStorage');
+        return false;
     },
 
     switchTab(tabName) {
@@ -431,6 +454,11 @@ const AdminPanel = {
 
     async loadOrders() {
         try {
+            // Verificar se está autenticado
+            if (!STATE.adminToken) {
+                throw new Error('Não autenticado. Faça login novamente.');
+            }
+            
             const orders = await API.getOrders();
             STATE.orders = orders;
             
@@ -451,7 +479,14 @@ const AdminPanel = {
                     </div>
                 `).join('');
         } catch (error) {
-            Utils.showNotification('Erro ao carregar pedidos', 'error');
+            console.error('❌ Erro ao carregar pedidos:', error);
+            if (error.message.includes('Não autenticado')) {
+                Utils.showNotification('Sessão expirada. Faça login novamente.', 'error');
+                this.hideAdminPanel();
+                this.showLoginModal();
+            } else {
+                Utils.showNotification('Erro ao carregar pedidos: ' + error.message, 'error');
+            }
         }
     },
 
@@ -497,6 +532,11 @@ const AdminPanel = {
 
     async loadCustomers() {
         try {
+            // Verificar se está autenticado
+            if (!STATE.adminToken) {
+                throw new Error('Não autenticado. Faça login novamente.');
+            }
+            
             const customers = await API.getCustomers();
             STATE.customers = customers;
             
@@ -513,7 +553,14 @@ const AdminPanel = {
                     </div>
                 `).join('');
         } catch (error) {
-            Utils.showNotification('Erro ao carregar clientes', 'error');
+            console.error('❌ Erro ao carregar clientes:', error);
+            if (error.message.includes('Não autenticado')) {
+                Utils.showNotification('Sessão expirada. Faça login novamente.', 'error');
+                this.hideAdminPanel();
+                this.showLoginModal();
+            } else {
+                Utils.showNotification('Erro ao carregar clientes: ' + error.message, 'error');
+            }
         }
     },
 
@@ -817,22 +864,24 @@ const Checkout = {
             
             let suggestionsHtml = '';
             suggestions.forEach(suggestion => {
-                suggestionsHtml += `
-                    <div class="suggestion-section">
-                        <h3>${suggestion.message}</h3>
-                        <div class="suggestion-products">
-                            ${suggestion.products.map(product => `
-                                <div class="suggestion-product" onclick="Checkout.addSuggestionToCart('${product.id}')">
-                                    <img src="${product.imagem || '/assets/images/default-product.jpg'}" alt="${product.nome}">
-                                    <div class="product-info">
-                                        <h4>${product.nome}</h4>
-                                        <p>${Utils.formatPrice(product.preco)}</p>
-                                    </div>
+                            suggestionsHtml += `
+                <div class="suggestion-section">
+                    <h3><i class="fas ${suggestion.type === 'drink' ? 'fa-glass-martini' : 'fa-ice-cream'}"></i> ${suggestion.message}</h3>
+                    <div class="suggestion-products">
+                        ${suggestion.products.map(product => `
+                            <div class="suggestion-product" onclick="Checkout.addSuggestionToCart('${product.id}')">
+                                <div class="product-image-placeholder">
+                                    <i class="fas ${Utils.getCategoryIcon(product.categoria)}"></i>
                                 </div>
-                            `).join('')}
-                        </div>
+                                <div class="product-info">
+                                    <h4>${product.nome}</h4>
+                                    <p>${Utils.formatPrice(product.preco)}</p>
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
-                `;
+                </div>
+            `;
             });
             
             modal.innerHTML = `
@@ -1035,7 +1084,7 @@ const Checkout = {
                     <h2>Pedido Confirmado!</h2>
                 </div>
                 <div class="order-confirmation-body">
-                    <p><strong>Número do Pedido:</strong> #${order.orderNumber || 'N/A'}</p>
+                    <p><strong>Número do Pedido:</strong> #${order.id || order.orderNumber || 'N/A'}</p>
                     <p><strong>Status:</strong> ${order.status}</p>
                     <p><strong>Total:</strong> ${Utils.formatPrice(Cart.getTotal())}</p>
                     <p>Seu pedido está sendo preparado!</p>
@@ -1240,6 +1289,7 @@ const OrdersPanel = {
     init() {
         this.bindEvents();
         this.loadOrdersPanel();
+        this.startAutoRefresh();
     },
 
     bindEvents() {
@@ -1251,9 +1301,18 @@ const OrdersPanel = {
         });
     },
 
+    startAutoRefresh() {
+        // Atualizar painel a cada 20 segundos
+        setInterval(() => {
+            if (window.location.hash === '#orders-panel') {
+                this.loadOrdersPanel();
+            }
+        }, 20000); // 20 segundos
+    },
+
     async loadOrdersPanel() {
         try {
-            const orders = await API.getOrders();
+            const orders = await API.getPublicOrders();
             this.updateStats(orders);
             this.renderOrders(orders);
         } catch (error) {

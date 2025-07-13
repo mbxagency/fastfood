@@ -664,6 +664,10 @@ body {
     color: var(--gray);
 }
 
+.orders-panel .section-subtitle {
+    color: white;
+}
+
 /* ===== MENU SECTION ===== */
 .menu {
     padding: var(--spacing-xxl) 0;
@@ -2190,12 +2194,22 @@ textarea:focus {
     box-shadow: 0 5px 15px rgba(0, 123, 255, 0.2);
 }
 
-.suggestion-product img {
+.suggestion-product img,
+.product-image-placeholder {
     width: 80px;
     height: 80px;
     object-fit: cover;
     border-radius: 8px;
     margin-bottom: 0.5rem;
+}
+
+.product-image-placeholder {
+    background: linear-gradient(135deg, #ffd700, #ff6b35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
 }
 
 .suggestion-product h4 {
@@ -2325,4 +2339,5 @@ textarea:focus {
 .payment-footer .btn {
     padding: 1rem 2rem;
     font-size: 1.1rem;
+    min-width: 120px;
 } 
