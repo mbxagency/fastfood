@@ -1,5 +1,6 @@
 from decimal import Decimal
 import logging
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
@@ -14,7 +15,7 @@ class ProdutoRepository(ProdutoRepositoryPort):
     def __init__(self, db: Session):
         self.db = db
 
-    def buscar_por_id(self, produto_id: int) -> Produto | None:
+    def buscar_por_id(self, produto_id: int) -> Optional[Produto]:
         try:
             model = self.db.query(ProdutoModel).filter_by(id=produto_id).first()
             return self._to_domain(model) if model else None
@@ -80,6 +81,7 @@ class ProdutoRepository(ProdutoRepositoryPort):
                 nome=model.nome,
                 categoria=model.categoria,
                 preco=Decimal(str(model.preco)),
+                estoque=100  # Estoque padrão para produtos existentes
             )
         except Exception as e:
             logger.error(f"Erro ao converter modelo para domínio: {e}")

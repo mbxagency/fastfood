@@ -3,13 +3,13 @@ const CONFIG = {
     API_BASE_URL: 'https://fastfood-vwtq.onrender.com',
     ENDPOINTS: {
         PRODUCTS: '/v1/api/public/produtos/',
-        ORDERS: '/v1/api/public/pedidos',
-        CUSTOMERS: '/v1/api/public/clientes',
-        PAYMENTS: '/v1/api/public/pagamento',
+        ORDERS: '/v1/api/public/pedidos/',
+        CUSTOMERS: '/v1/api/public/clientes/',
+        PAYMENTS: '/v1/api/public/pagamento/',
         ADMIN_LOGIN: '/v1/api/public/login',
-        ADMIN_ORDERS: '/v1/api/admin/pedidos',
-        ADMIN_PRODUCTS: '/v1/api/admin/produtos',
-        ADMIN_CUSTOMERS: '/v1/api/admin/clientes'
+        ADMIN_ORDERS: '/v1/api/admin/pedidos/',
+        ADMIN_PRODUCTS: '/v1/api/admin/produtos/',
+        ADMIN_CUSTOMERS: '/v1/api/admin/clientes/'
     },
     ADMIN_CREDENTIALS: {
         USERNAME: 'admin',
@@ -131,6 +131,13 @@ const API = {
         return await this.request(CONFIG.ENDPOINTS.ORDERS, {
             method: 'POST',
             body: JSON.stringify(orderData)
+        });
+    },
+
+    async createCustomer(customerData) {
+        return await this.request(CONFIG.ENDPOINTS.CUSTOMERS, {
+            method: 'POST',
+            body: JSON.stringify(customerData)
         });
     },
 
@@ -696,18 +703,23 @@ const Checkout = {
         }
 
         try {
+            // Primeiro, criar ou obter o cliente
+            const clienteData = {
+                nome: 'Cliente Padrão',
+                email: 'cliente@exemplo.com',
+                cpf: '000.000.000-00'
+            };
+
+            const cliente = await API.createCustomer(clienteData);
+
+            // Depois, criar o pedido
             const orderData = {
-                cliente: {
-                    nome: 'Cliente Padrão',
-                    email: 'cliente@exemplo.com',
-                    cpf: '000.000.000-00'
-                },
+                cliente_id: cliente.id,
                 itens: STATE.cart.map(item => ({
                     produto_id: item.id,
-                    quantidade: item.quantity,
-                    preco: item.preco
+                    quantidade: item.quantity
                 })),
-                status: 'pendente'
+                observacoes: 'Pedido realizado via sistema web'
             };
 
             const order = await API.createOrder(orderData);
@@ -720,7 +732,8 @@ const Checkout = {
             // Simulate order tracking
             this.showOrderConfirmation(order);
         } catch (error) {
-            Utils.showNotification('Erro ao processar pedido', 'error');
+            console.error('Erro ao processar pedido:', error);
+            Utils.showNotification('Erro ao processar pedido: ' + error.message, 'error');
         }
     },
 
