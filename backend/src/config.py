@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     DEBUG: bool = os.getenv("DEBUG", "true").lower() == "true"
     
     # CORS - Get from Render environment
-    CORS_ALLOW_ORIGINS_STR: str = os.getenv("CORS_ALLOW_ORIGINS", "http://localhost:3000")
+    CORS_ALLOW_ORIGINS_STR: str = os.getenv("CORS_ALLOW_ORIGINS", "http://localhost:3000,http://localhost:8000,https://fastfood-frontend.vercel.app")
     CORS_ALLOW_CREDENTIALS: bool = True
     CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
     CORS_ALLOW_HEADERS: List[str] = ["*"]
@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     def CORS_ALLOW_ORIGINS(self) -> List[str]:
         """Convert CORS_ALLOW_ORIGINS_STR to list"""
         if not self.CORS_ALLOW_ORIGINS_STR:
-            return ["http://localhost:3000"]
+            return ["http://localhost:3000", "http://localhost:8000", "https://fastfood-frontend.vercel.app"]
         
         origins = []
         for origin in self.CORS_ALLOW_ORIGINS_STR.split(","):
@@ -70,7 +70,7 @@ class Settings(BaseSettings):
             if origin:
                 origins.append(origin)
         
-        return origins if origins else ["http://localhost:3000"]
+        return origins if origins else ["http://localhost:3000", "http://localhost:8000", "https://fastfood-frontend.vercel.app"]
     
     class Config:
         env_file = ".env"
