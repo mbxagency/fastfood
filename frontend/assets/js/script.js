@@ -760,16 +760,11 @@ const Checkout = {
             const order = await API.createOrder(orderData);
             console.log('✅ Pedido criado:', order);
             
-            // Adicionar número do pedido à resposta
+                        // Adicionar número do pedido à resposta
             order.orderNumber = orderNumber;
             
-            Cart.clear();
-            CartSidebar.hide();
-            
-            Utils.showNotification('Pedido realizado com sucesso!', 'success');
-            
-            // Simulate order tracking
-            this.showOrderConfirmation(order);
+            // Mostrar modal de pagamento com QR Code
+            await this.showPaymentModal(order);
         } catch (error) {
             console.error('❌ Erro ao processar pedido:', error);
             console.error('❌ Stack trace:', error.stack);
@@ -890,7 +885,147 @@ const Checkout = {
         return newOrderNumber;
     },
 
+    async showPaymentModal(order) {
+        return new Promise((resolve) => {
+            const modal = document.createElement('div');
+            modal.className = 'payment-modal';
+            
+            // Gerar QR Code simples (simulação)
+            const qrCodeData = this.generateQRCodeData(order);
+            
+            modal.innerHTML = `
+                <div class="payment-content">
+                    <div class="payment-header">
+                        <i class="fas fa-qrcode"></i>
+                        <h2>Pagamento via Mercado Pago</h2>
+                    </div>
+                    <div class="payment-body">
+                        <div class="payment-info">
+                            <p><strong>Pedido:</strong> #${order.orderNumber}</p>
+                            <p><strong>Total:</strong> ${Utils.formatPrice(Cart.getTotal())}</p>
+                            <p><strong>Status:</strong> Aguardando Pagamento</p>
+                        </div>
+                        
+                        <div class="qr-code-container">
+                            <div class="qr-code">
+                                <i class="fas fa-qrcode"></i>
+                            </div>
+                            <div class="payment-instructions">
+                                <p>Escaneie o QR Code com o app do Mercado Pago</p>
+                                <p>ou use o PIX para pagamento</p>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-timer">
+                            <i class="fas fa-clock"></i>
+                            <span id="paymentTimer">15:00</span>
+                        </div>
+                    </div>
+                    <div class="payment-footer">
+                        <button class="btn btn-secondary" onclick="Checkout.cancelPayment()">
+                            Cancelar
+                        </button>
+                        <button class="btn btn-primary" onclick="Checkout.confirmPayment()">
+                            Já Paguei
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Iniciar timer de pagamento (15 minutos)
+            this.startPaymentTimer();
+            
+            // Armazenar a promise para ser resolvida
+            Checkout.paymentPromise = resolve;
+        });
+    },
+
+    generateQRCodeData(order) {
+        // Simulação de dados do QR Code do Mercado Pago
+        return {
+            amount: Cart.getTotal(),
+            orderId: order.orderNumber,
+            description: `Pedido #${order.orderNumber} - BurgerHouse`,
+            pixKey: 'burgerhouse@mercadopago.com'
+        };
+    },
+
+    startPaymentTimer() {
+        let timeLeft = 15 * 60; // 15 minutos em segundos
+        
+        const timer = setInterval(() => {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            
+            const timerElement = document.getElementById('paymentTimer');
+            if (timerElement) {
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                this.cancelPayment();
+            }
+            
+            timeLeft--;
+        }, 1000);
+        
+        // Armazenar o timer para poder cancelar
+        Checkout.paymentTimer = timer;
+    },
+
+    cancelPayment() {
+        if (Checkout.paymentTimer) {
+            clearInterval(Checkout.paymentTimer);
+        }
+        
+        const modal = document.querySelector('.payment-modal');
+        if (modal) {
+            modal.remove();
+        }
+        
+        Utils.showNotification('Pagamento cancelado', 'error');
+        
+        if (Checkout.paymentPromise) {
+            Checkout.paymentPromise(false);
+            Checkout.paymentPromise = null;
+        }
+    },
+
+    confirmPayment() {
+        if (Checkout.paymentTimer) {
+            clearInterval(Checkout.paymentTimer);
+        }
+        
+        const modal = document.querySelector('.payment-modal');
+        if (modal) {
+            modal.remove();
+        }
+        
+        Utils.showNotification('Pagamento confirmado! Pedido em preparação.', 'success');
+        
+        // Limpar carrinho e fechar sidebar
+        Cart.clear();
+        CartSidebar.hide();
+        
+        // Mostrar confirmação do pedido com tracking
+        this.showOrderConfirmation({
+            ...Checkout.currentOrder,
+            status: 'Pago'
+        });
+        
+        if (Checkout.paymentPromise) {
+            Checkout.paymentPromise(true);
+            Checkout.paymentPromise = null;
+        }
+    },
+
     showOrderConfirmation(order) {
+        // Armazenar pedido atual para referência
+        Checkout.currentOrder = order;
+        
         const modal = document.createElement('div');
         modal.className = 'order-confirmation-modal';
         modal.innerHTML = `
@@ -1100,6 +1235,105 @@ const LoadingScreen = {
     }
 };
 
+// ===== ORDERS PANEL =====
+const OrdersPanel = {
+    init() {
+        this.bindEvents();
+        this.loadOrdersPanel();
+    },
+
+    bindEvents() {
+        // Listen for hash changes to load orders panel
+        window.addEventListener('hashchange', () => {
+            if (window.location.hash === '#orders-panel') {
+                this.loadOrdersPanel();
+            }
+        });
+    },
+
+    async loadOrdersPanel() {
+        try {
+            const orders = await API.getOrders();
+            this.updateStats(orders);
+            this.renderOrders(orders);
+        } catch (error) {
+            console.error('Erro ao carregar pedidos:', error);
+            Utils.showNotification('Erro ao carregar pedidos', 'error');
+        }
+    },
+
+    updateStats(orders) {
+        const totalOrders = orders.length;
+        const preparingOrders = orders.filter(order => order.status === 'preparando').length;
+        const readyOrders = orders.filter(order => order.status === 'pronto').length;
+        const finishedOrders = orders.filter(order => order.status === 'entregue').length;
+
+        document.getElementById('totalOrders').textContent = totalOrders;
+        document.getElementById('preparingOrders').textContent = preparingOrders;
+        document.getElementById('readyOrders').textContent = readyOrders;
+        document.getElementById('finishedOrders').textContent = finishedOrders;
+    },
+
+    renderOrders(orders) {
+        const ordersList = document.getElementById('ordersList');
+        if (!ordersList) return;
+
+        if (orders.length === 0) {
+            ordersList.innerHTML = '';
+            return;
+        }
+
+        // Ordenar pedidos por data (mais recentes primeiro)
+        const sortedOrders = orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        ordersList.innerHTML = sortedOrders.map(order => {
+            const statusClass = this.getStatusClass(order.status);
+            const statusText = this.getStatusText(order.status);
+            const orderTime = new Date(order.created_at).toLocaleString('pt-BR');
+            
+            const itemsText = order.itens.map(item => 
+                `${item.quantidade}x ${item.produto.nome}`
+            ).join(', ');
+
+            return `
+                <div class="order-item">
+                    <div class="order-header">
+                        <span class="order-number">Pedido #${order.id}</span>
+                        <span class="order-status ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="order-details">
+                        <div class="order-items">${itemsText}</div>
+                        <div class="order-total">R$ ${order.total.toFixed(2).replace('.', ',')}</div>
+                    </div>
+                    <div class="order-time">
+                        <i class="fas fa-clock"></i> ${orderTime}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    getStatusClass(status) {
+        const statusMap = {
+            'pendente': 'pending',
+            'preparando': 'preparing',
+            'pronto': 'ready',
+            'entregue': 'finished'
+        };
+        return statusMap[status] || 'pending';
+    },
+
+    getStatusText(status) {
+        const statusMap = {
+            'pendente': 'Pendente',
+            'preparando': 'Em Preparação',
+            'pronto': 'Pronto',
+            'entregue': 'Finalizado'
+        };
+        return statusMap[status] || 'Pendente';
+    }
+};
+
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
     // Show loading screen and force hide after 2 seconds
@@ -1112,6 +1346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         CartSidebar.init();
         AdminPanel.init();
         Forms.init();
+        OrdersPanel.init();
         Cart.loadFromStorage();
     } catch (error) {
         console.error('Erro ao inicializar módulos:', error);
@@ -1135,3 +1370,4 @@ window.Products = Products;
 window.AdminPanel = AdminPanel;
 window.Checkout = Checkout;
 window.Utils = Utils;
+window.OrdersPanel = OrdersPanel;
