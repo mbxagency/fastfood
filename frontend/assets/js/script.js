@@ -109,16 +109,26 @@ const API = {
             config.headers.Authorization = `Bearer ${STATE.adminToken}`;
         }
 
+        console.log('🌐 API Request:', { url, method: options.method || 'GET', body: options.body });
+        console.log('🌐 API Config:', config);
+
         try {
             const response = await fetch(url, config);
+            console.log('🌐 API Response status:', response.status);
+            console.log('🌐 API Response headers:', Object.fromEntries(response.headers.entries()));
             
             if (!response.ok) {
+                const errorText = await response.text();
+                console.error('🌐 API Error response:', errorText);
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
-            return await response.json();
+            const data = await response.json();
+            console.log('🌐 API Response data:', data);
+            return data;
         } catch (error) {
-            console.error('API Error:', error);
+            console.error('❌ API Error:', error);
+            console.error('❌ API Error details:', { url, config, error: error.message });
             throw error;
         }
     },
@@ -703,6 +713,9 @@ const Checkout = {
         }
 
         try {
+            console.log('🛒 Iniciando processamento do pedido...');
+            console.log('🛒 Carrinho:', STATE.cart);
+            
             // Primeiro, criar ou obter o cliente
             const clienteData = {
                 nome: 'Cliente Padrão',
@@ -710,7 +723,9 @@ const Checkout = {
                 cpf: '000.000.000-00'
             };
 
+            console.log('👤 Criando cliente:', clienteData);
             const cliente = await API.createCustomer(clienteData);
+            console.log('✅ Cliente criado:', cliente);
 
             // Depois, criar o pedido
             const orderData = {
@@ -722,7 +737,9 @@ const Checkout = {
                 observacoes: 'Pedido realizado via sistema web'
             };
 
+            console.log('📦 Criando pedido:', orderData);
             const order = await API.createOrder(orderData);
+            console.log('✅ Pedido criado:', order);
             
             Cart.clear();
             CartSidebar.hide();
@@ -732,7 +749,8 @@ const Checkout = {
             // Simulate order tracking
             this.showOrderConfirmation(order);
         } catch (error) {
-            console.error('Erro ao processar pedido:', error);
+            console.error('❌ Erro ao processar pedido:', error);
+            console.error('❌ Stack trace:', error.stack);
             Utils.showNotification('Erro ao processar pedido: ' + error.message, 'error');
         }
     },
