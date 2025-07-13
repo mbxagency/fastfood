@@ -1266,10 +1266,13 @@ const Checkout = {
         CartSidebar.hide();
         
         // Mostrar confirmação do pedido com tracking
-        this.showOrderConfirmation({
+        const orderWithNumber = {
             ...Checkout.currentOrder,
-            status: 'Pago'
-        });
+            status: 'Pago',
+            orderNumber: Checkout.currentOrder?.orderNumber,
+            orderNumberDisplay: Checkout.currentOrder?.orderNumberDisplay
+        };
+        this.showOrderConfirmation(orderWithNumber);
         
         if (Checkout.paymentPromise) {
             Checkout.paymentPromise(true);
@@ -1522,6 +1525,7 @@ const OrdersPanel = {
     async loadOrdersPanel() {
         try {
             console.log('📊 Carregando painel de pedidos...');
+            console.log('📊 Hash atual:', window.location.hash);
             const orders = await API.getPublicOrders();
             console.log('📊 Pedidos recebidos:', orders);
             this.updateStats(orders);
@@ -1561,7 +1565,11 @@ const OrdersPanel = {
         }
 
         // Ordenar pedidos por data (mais recentes primeiro)
-        const sortedOrders = orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        const sortedOrders = orders.sort((a, b) => {
+            const dateA = new Date(a.data_criacao || a.created_at || 0);
+            const dateB = new Date(b.data_criacao || b.created_at || 0);
+            return dateB - dateA;
+        });
         console.log('📊 Pedidos ordenados:', sortedOrders);
 
         ordersList.innerHTML = sortedOrders.map(order => {

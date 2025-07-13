@@ -2641,14 +2641,15 @@ textarea:focus {
 }
 
 .customer-identification-footer .btn {
-    min-width: 140px;
-    padding: var(--spacing-md) var(--spacing-lg);
-    font-weight: var(--font-bold);
+    min-width: 120px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-weight: var(--font-semibold);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-radius: var(--radius-md);
     transition: all var(--transition-normal);
     box-shadow: var(--shadow-md);
+    font-size: 0.9rem;
 }
 
 .customer-identification-footer .btn:hover {
