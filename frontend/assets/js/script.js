@@ -716,15 +716,34 @@ const Checkout = {
             console.log('🛒 Iniciando processamento do pedido...');
             console.log('🛒 Carrinho:', STATE.cart);
             
-            // Primeiro, criar ou obter o cliente
-            const clienteData = {
-                nome: 'Cliente Padrão'
-                // Removendo email e CPF para evitar problemas de validação
-            };
+            // Verificar se o cliente já existe (regra de negócio)
+            let cliente = null;
+            const existingCustomer = this.checkExistingCustomer();
+            
+            if (existingCustomer) {
+                console.log('👤 Cliente existente encontrado:', existingCustomer);
+                cliente = existingCustomer;
+            } else {
+                // Criar novo cliente
+                const clienteData = {
+                    nome: 'Cliente Padrão'
+                };
+                console.log('👤 Criando novo cliente:', clienteData);
+                cliente = await API.createCustomer(clienteData);
+                console.log('✅ Cliente criado:', cliente);
+            }
 
-            console.log('👤 Criando cliente:', clienteData);
-            const cliente = await API.createCustomer(clienteData);
-            console.log('✅ Cliente criado:', cliente);
+            // Verificar regras de negócio para bebidas e sobremesas
+            const suggestions = this.checkOrderSuggestions();
+            if (suggestions.length > 0) {
+                const shouldContinue = await this.showSuggestions(suggestions);
+                if (!shouldContinue) {
+                    return; // Usuário cancelou para adicionar sugestões
+                }
+            }
+
+            // Gerar número sequencial do pedido
+            const orderNumber = this.generateOrderNumber();
 
             // Depois, criar o pedido
             const orderData = {
@@ -733,12 +752,16 @@ const Checkout = {
                     produto_id: item.id,
                     quantidade: item.quantity
                 })),
-                observacoes: 'Pedido realizado via sistema web'
+                observacoes: 'Pedido realizado via sistema web',
+                orderNumber: orderNumber
             };
 
             console.log('📦 Criando pedido:', orderData);
             const order = await API.createOrder(orderData);
             console.log('✅ Pedido criado:', order);
+            
+            // Adicionar número do pedido à resposta
+            order.orderNumber = orderNumber;
             
             Cart.clear();
             CartSidebar.hide();
@@ -754,6 +777,119 @@ const Checkout = {
         }
     },
 
+    checkExistingCustomer() {
+        // Verificar se há cliente salvo no localStorage
+        const savedCustomer = localStorage.getItem('currentCustomer');
+        if (savedCustomer) {
+            try {
+                return JSON.parse(savedCustomer);
+            } catch (e) {
+                console.error('Erro ao parsear cliente salvo:', e);
+            }
+        }
+        return null;
+    },
+
+    checkOrderSuggestions() {
+        const suggestions = [];
+        const cartCategories = STATE.cart.map(item => item.categoria);
+        
+        // Verificar se não tem bebida
+        if (!cartCategories.includes('drinks')) {
+            suggestions.push({
+                type: 'drink',
+                message: 'Deseja adicionar uma bebida ao seu pedido?',
+                products: STATE.products.filter(p => p.categoria === 'drinks').slice(0, 3)
+            });
+        }
+        
+        // Verificar se não tem sobremesa
+        if (!cartCategories.includes('desserts')) {
+            suggestions.push({
+                type: 'dessert',
+                message: 'Que tal uma sobremesa para completar seu pedido?',
+                products: STATE.products.filter(p => p.categoria === 'desserts').slice(0, 3)
+            });
+        }
+        
+        return suggestions;
+    },
+
+    async showSuggestions(suggestions) {
+        return new Promise((resolve) => {
+            const modal = document.createElement('div');
+            modal.className = 'suggestions-modal';
+            
+            let suggestionsHtml = '';
+            suggestions.forEach(suggestion => {
+                suggestionsHtml += `
+                    <div class="suggestion-section">
+                        <h3>${suggestion.message}</h3>
+                        <div class="suggestion-products">
+                            ${suggestion.products.map(product => `
+                                <div class="suggestion-product" onclick="Checkout.addSuggestionToCart('${product.id}')">
+                                    <img src="${product.imagem || '/assets/images/default-product.jpg'}" alt="${product.nome}">
+                                    <div class="product-info">
+                                        <h4>${product.nome}</h4>
+                                        <p>${Utils.formatPrice(product.preco)}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            modal.innerHTML = `
+                <div class="suggestions-content">
+                    <div class="suggestions-header">
+                        <h2>💡 Sugestões para seu pedido</h2>
+                        <button class="close-btn" onclick="this.parentElement.parentElement.parentElement.remove(); Checkout.resolveSuggestion(true);">×</button>
+                    </div>
+                    <div class="suggestions-body">
+                        ${suggestionsHtml}
+                    </div>
+                    <div class="suggestions-footer">
+                        <button class="btn btn-secondary" onclick="this.parentElement.parentElement.parentElement.remove(); Checkout.resolveSuggestion(false);">
+                            Continuar sem adicionar
+                        </button>
+                        <button class="btn btn-primary" onclick="this.parentElement.parentElement.parentElement.remove(); Checkout.resolveSuggestion(true);">
+                            Finalizar pedido
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Armazenar a promise para ser resolvida
+            Checkout.suggestionPromise = resolve;
+        });
+    },
+
+    addSuggestionToCart(productId) {
+        const product = STATE.products.find(p => p.id === productId);
+        if (product) {
+            Cart.addItem(product);
+            Utils.showNotification(`${product.nome} adicionado ao carrinho!`, 'success');
+        }
+    },
+
+    resolveSuggestion(shouldContinue) {
+        if (Checkout.suggestionPromise) {
+            Checkout.suggestionPromise(shouldContinue);
+            Checkout.suggestionPromise = null;
+        }
+    },
+
+    generateOrderNumber() {
+        // Gerar número sequencial simples (100, 101, 102...)
+        const lastOrderNumber = localStorage.getItem('lastOrderNumber') || 99;
+        const newOrderNumber = parseInt(lastOrderNumber) + 1;
+        localStorage.setItem('lastOrderNumber', newOrderNumber.toString());
+        return newOrderNumber;
+    },
+
     showOrderConfirmation(order) {
         const modal = document.createElement('div');
         modal.className = 'order-confirmation-modal';
@@ -764,10 +900,28 @@ const Checkout = {
                     <h2>Pedido Confirmado!</h2>
                 </div>
                 <div class="order-confirmation-body">
-                    <p><strong>Número do Pedido:</strong> #${order.id?.slice(0, 8) || 'N/A'}</p>
+                    <p><strong>Número do Pedido:</strong> #${order.orderNumber || 'N/A'}</p>
                     <p><strong>Status:</strong> ${order.status}</p>
                     <p><strong>Total:</strong> ${Utils.formatPrice(Cart.getTotal())}</p>
                     <p>Seu pedido está sendo preparado!</p>
+                </div>
+                <div class="order-tracking">
+                    <div class="tracking-step active" data-step="received">
+                        <i class="fas fa-receipt"></i>
+                        <span>Recebido</span>
+                    </div>
+                    <div class="tracking-step" data-step="preparing">
+                        <i class="fas fa-utensils"></i>
+                        <span>Em Preparação</span>
+                    </div>
+                    <div class="tracking-step" data-step="ready">
+                        <i class="fas fa-check"></i>
+                        <span>Pronto</span>
+                    </div>
+                    <div class="tracking-step" data-step="finished">
+                        <i class="fas fa-flag-checkered"></i>
+                        <span>Finalizado</span>
+                    </div>
                 </div>
                 <button class="btn btn-primary" onclick="this.parentElement.parentElement.remove()">
                     Fechar
@@ -776,6 +930,43 @@ const Checkout = {
         `;
         
         document.body.appendChild(modal);
+        
+        // Iniciar simulação de progresso do pedido
+        this.simulateOrderProgress(order.id);
+    },
+
+    simulateOrderProgress(orderId) {
+        const steps = ['received', 'preparing', 'ready', 'finished'];
+        let currentStep = 0;
+        
+        const interval = setInterval(() => {
+            if (currentStep < steps.length) {
+                // Atualizar visual do progresso
+                document.querySelectorAll('.tracking-step').forEach((step, index) => {
+                    if (index <= currentStep) {
+                        step.classList.add('active');
+                    } else {
+                        step.classList.remove('active');
+                    }
+                });
+                
+                // Atualizar status no texto
+                const statusText = document.querySelector('.order-confirmation-body p:nth-child(2)');
+                if (statusText) {
+                    const statusMap = {
+                        'received': 'Recebido',
+                        'preparing': 'Em Preparação',
+                        'ready': 'Pronto',
+                        'finished': 'Finalizado'
+                    };
+                    statusText.innerHTML = `<strong>Status:</strong> ${statusMap[steps[currentStep]]}`;
+                }
+                
+                currentStep++;
+            } else {
+                clearInterval(interval);
+            }
+        }, 30000); // 30 segundos entre cada status
     }
 };
 
