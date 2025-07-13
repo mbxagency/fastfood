@@ -870,7 +870,7 @@ const Checkout = {
                     <div class="suggestion-products">
                         ${suggestion.products.map(product => `
                             <div class="suggestion-product" onclick="Checkout.addSuggestionToCart('${product.id}')">
-                                <div class="product-image-placeholder">
+                                <div class="product-icon">
                                     <i class="fas ${Utils.getCategoryIcon(product.categoria)}"></i>
                                 </div>
                                 <div class="product-info">
@@ -1075,6 +1075,13 @@ const Checkout = {
         // Armazenar pedido atual para referência
         Checkout.currentOrder = order;
         
+        console.log('🔍 Order object in confirmation:', order);
+        console.log('🔍 Order ID:', order.id);
+        console.log('🔍 Order Number:', order.orderNumber);
+        
+        const orderNumber = order.id || order.orderNumber || 'N/A';
+        console.log('🔍 Final order number:', orderNumber);
+        
         const modal = document.createElement('div');
         modal.className = 'order-confirmation-modal';
         modal.innerHTML = `
@@ -1084,8 +1091,8 @@ const Checkout = {
                     <h2>Pedido Confirmado!</h2>
                 </div>
                 <div class="order-confirmation-body">
-                    <p><strong>Número do Pedido:</strong> #${order.id || order.orderNumber || 'N/A'}</p>
-                    <p><strong>Status:</strong> ${order.status}</p>
+                    <p><strong>Número do Pedido:</strong> #${orderNumber}</p>
+                    <p><strong>Status:</strong> ${order.status || 'Pago'}</p>
                     <p><strong>Total:</strong> ${Utils.formatPrice(Cart.getTotal())}</p>
                     <p>Seu pedido está sendo preparado!</p>
                 </div>
@@ -1312,7 +1319,9 @@ const OrdersPanel = {
 
     async loadOrdersPanel() {
         try {
+            console.log('📊 Carregando painel de pedidos...');
             const orders = await API.getPublicOrders();
+            console.log('📊 Pedidos recebidos:', orders);
             this.updateStats(orders);
             this.renderOrders(orders);
         } catch (error) {
@@ -1335,15 +1344,23 @@ const OrdersPanel = {
 
     renderOrders(orders) {
         const ordersList = document.getElementById('ordersList');
-        if (!ordersList) return;
+        if (!ordersList) {
+            console.log('❌ Elemento ordersList não encontrado');
+            return;
+        }
+
+        console.log('📊 Renderizando pedidos:', orders);
+        console.log('📊 Quantidade de pedidos:', orders.length);
 
         if (orders.length === 0) {
+            console.log('📊 Nenhum pedido para renderizar');
             ordersList.innerHTML = '';
             return;
         }
 
         // Ordenar pedidos por data (mais recentes primeiro)
         const sortedOrders = orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        console.log('📊 Pedidos ordenados:', sortedOrders);
 
         ordersList.innerHTML = sortedOrders.map(order => {
             const statusClass = this.getStatusClass(order.status);
@@ -1353,6 +1370,8 @@ const OrdersPanel = {
             const itemsText = order.itens.map(item => 
                 `${item.quantidade}x ${item.produto.nome}`
             ).join(', ');
+
+            console.log('📊 Renderizando pedido:', order.id, 'com status:', order.status);
 
             return `
                 <div class="order-item">
@@ -1370,6 +1389,8 @@ const OrdersPanel = {
                 </div>
             `;
         }).join('');
+        
+        console.log('📊 HTML gerado para ordersList');
     },
 
     getStatusClass(status) {
