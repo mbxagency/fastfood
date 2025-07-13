@@ -1567,11 +1567,19 @@ const OrdersPanel = {
         ordersList.innerHTML = sortedOrders.map(order => {
             const statusClass = this.getStatusClass(order.status);
             const statusText = this.getStatusText(order.status);
-            const orderTime = new Date(order.created_at).toLocaleString('pt-BR');
+            const orderTime = new Date(order.data_criacao || order.created_at).toLocaleString('pt-BR');
             
-            const itemsText = order.itens.map(item => 
-                `${item.quantidade}x ${item.produto.nome}`
-            ).join(', ');
+            const itemsText = order.itens.map(item => {
+                // Verificar se temos informações do produto
+                if (item.produto && item.produto.nome) {
+                    return `${item.quantidade}x ${item.produto.nome}`;
+                } else if (item.produto_id) {
+                    // Se não temos o nome do produto, usar o ID
+                    return `${item.quantidade}x Produto #${item.produto_id.slice(0, 8)}`;
+                } else {
+                    return `${item.quantidade}x Item`;
+                }
+            }).join(', ');
 
             console.log('📊 Renderizando pedido:', order.id, 'com status:', order.status);
 
@@ -1583,7 +1591,7 @@ const OrdersPanel = {
                     </div>
                     <div class="order-details">
                         <div class="order-items">${itemsText}</div>
-                        <div class="order-total">R$ ${order.total.toFixed(2).replace('.', ',')}</div>
+                        <div class="order-total">R$ ${(order.total || 0).toFixed(2).replace('.', ',')}</div>
                     </div>
                     <div class="order-time">
                         <i class="fas fa-clock"></i> ${orderTime}
