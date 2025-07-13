@@ -71,7 +71,7 @@ class PedidoRepository(PedidoRepositoryPort):
         pedidos = [self._converter_para_entidade(p) for p in pedidos_model]
         
         # Ordenar por prioridade de status e depois por data
-        pedidos.sort(key=lambda x: (status_priority.get(x.status.value, 999), x.data_criacao))
+        pedidos.sort(key=lambda x: (status_priority.get(x.status, 999), x.data_criacao))
         
         return pedidos
 
@@ -100,7 +100,7 @@ class PedidoRepository(PedidoRepositoryPort):
         return Pedido(
             id=model.id,
             cliente_id=model.cliente_id,
-            status=model.status,
+            status=StatusPedido(model.status),
             data_criacao=model.data_criacao,
             itens=itens,
         )
