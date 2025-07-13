@@ -718,9 +718,8 @@ const Checkout = {
             
             // Primeiro, criar ou obter o cliente
             const clienteData = {
-                nome: 'Cliente Padrão',
-                email: 'cliente@exemplo.com',
-                cpf: '000.000.000-00'
+                nome: 'Cliente Padrão'
+                // Removendo email e CPF para evitar problemas de validação
             };
 
             console.log('👤 Criando cliente:', clienteData);
