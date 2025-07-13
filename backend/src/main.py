@@ -33,6 +33,7 @@ app.add_middleware(
 )
 
 @app.get("/")
+@app.head("/")
 def root():
     """Rota raiz da API"""
     return {
@@ -48,6 +49,7 @@ def root():
     }
 
 @app.get("/health")
+@app.head("/health")
 def health_check():
     return {"status": "healthy", "version": settings.API_VERSION}
 

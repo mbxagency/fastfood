@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     # CORS - Get from Render environment
     CORS_ALLOW_ORIGINS_STR: str = os.getenv("CORS_ALLOW_ORIGINS", "http://localhost:3000")
     CORS_ALLOW_CREDENTIALS: bool = True
-    CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE"]
+    CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
     CORS_ALLOW_HEADERS: List[str] = ["*"]
     
     # API - Get from Render environment
