@@ -1302,6 +1302,19 @@ body {
         gap: 10px;
     }
     
+    .customer-identification-content {
+        padding: 1.5rem;
+        max-width: 95%;
+    }
+    
+    .identification-tabs {
+        flex-direction: column;
+    }
+    
+    .identification-tabs .tab-btn {
+        min-width: auto;
+    }
+    
     .stat-card {
         padding: 20px;
     }
@@ -2338,5 +2351,120 @@ textarea:focus {
 .payment-footer .btn {
     padding: 1rem 2rem;
     font-size: 1.1rem;
+    min-width: 120px;
+}
+
+/* ===== CUSTOMER IDENTIFICATION MODAL ===== */
+.customer-identification-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.customer-identification-content {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.customer-identification-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.customer-identification-header i {
+    font-size: 3rem;
+    color: var(--primary-red);
+    margin-bottom: 1rem;
+}
+
+.customer-identification-header h2 {
+    color: var(--dark-gray);
+    margin: 0;
+}
+
+.customer-identification-body {
+    margin-bottom: 2rem;
+}
+
+.customer-identification-body > p {
+    text-align: center;
+    color: var(--gray);
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+.identification-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.identification-tabs .tab-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 1rem;
+    border: 2px solid var(--light-gray);
+    background: white;
+    color: var(--dark-gray);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.identification-tabs .tab-btn:hover {
+    border-color: var(--primary-yellow);
+    transform: translateY(-2px);
+}
+
+.identification-tabs .tab-btn.active {
+    border-color: var(--primary-red);
+    background: var(--primary-red);
+    color: white;
+}
+
+.identification-tabs .tab-btn i {
+    font-size: 1.5rem;
+}
+
+.tab-content {
+    position: relative;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.customer-identification-footer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--light-gray);
+}
+
+.customer-identification-footer .btn {
     min-width: 120px;
 } 

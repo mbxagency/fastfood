@@ -174,6 +174,10 @@ const API = {
         return await this.request(CONFIG.ENDPOINTS.ORDERS);
     },
 
+    async getCustomerByCPF(cpf) {
+        return await this.request(`/v1/api/public/clientes/cpf/${cpf}`);
+    },
+
     async getCustomers() {
         return await this.request(CONFIG.ENDPOINTS.ADMIN_CUSTOMERS);
     },
@@ -763,22 +767,14 @@ const Checkout = {
             console.log('🛒 Iniciando processamento do pedido...');
             console.log('🛒 Carrinho:', STATE.cart);
             
-            // Verificar se o cliente já existe (regra de negócio)
-            let cliente = null;
-            const existingCustomer = this.checkExistingCustomer();
-            
-            if (existingCustomer) {
-                console.log('👤 Cliente existente encontrado:', existingCustomer);
-                cliente = existingCustomer;
-            } else {
-                // Criar novo cliente
-                const clienteData = {
-                    nome: 'Cliente Padrão'
-                };
-                console.log('👤 Criando novo cliente:', clienteData);
-                cliente = await API.createCustomer(clienteData);
-                console.log('✅ Cliente criado:', cliente);
+            // Mostrar modal de identificação do cliente
+            const cliente = await this.showCustomerIdentificationModal();
+            if (!cliente) {
+                console.log('❌ Cliente cancelou identificação');
+                return;
             }
+            
+            console.log('👤 Cliente identificado:', cliente);
 
             // Verificar regras de negócio para bebidas e sobremesas
             const suggestions = this.checkOrderSuggestions();
@@ -932,6 +928,223 @@ const Checkout = {
         const newOrderNumber = parseInt(lastOrderNumber) + 1;
         localStorage.setItem('lastOrderNumber', newOrderNumber.toString());
         return newOrderNumber;
+    },
+
+    async showCustomerIdentificationModal() {
+        return new Promise((resolve) => {
+            const modal = document.createElement('div');
+            modal.className = 'customer-identification-modal';
+            
+            modal.innerHTML = `
+                <div class="customer-identification-content">
+                    <div class="customer-identification-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h2>Identificação do Cliente</h2>
+                    </div>
+                    <div class="customer-identification-body">
+                        <p>Como você gostaria de se identificar?</p>
+                        
+                        <div class="identification-tabs">
+                            <button class="tab-btn active" data-tab="cpf">
+                                <i class="fas fa-id-card"></i>
+                                Buscar por CPF
+                            </button>
+                            <button class="tab-btn" data-tab="register">
+                                <i class="fas fa-user-plus"></i>
+                                Cadastrar
+                            </button>
+                            <button class="tab-btn" data-tab="anonymous">
+                                <i class="fas fa-user-secret"></i>
+                                Anônimo
+                            </button>
+                        </div>
+                        
+                        <div class="tab-content">
+                            <!-- Tab CPF -->
+                            <div class="tab-pane active" id="cpfTab">
+                                <div class="form-group">
+                                    <label for="cpfInput">CPF:</label>
+                                    <input type="text" id="cpfInput" placeholder="000.000.000-00" maxlength="14">
+                                </div>
+                                <button class="btn btn-primary" onclick="Checkout.searchCustomerByCPF()">
+                                    <i class="fas fa-search"></i>
+                                    Buscar Cliente
+                                </button>
+                            </div>
+                            
+                            <!-- Tab Cadastro -->
+                            <div class="tab-pane" id="registerTab">
+                                <div class="form-group">
+                                    <label for="nameInput">Nome:</label>
+                                    <input type="text" id="nameInput" placeholder="Seu nome completo">
+                                </div>
+                                <div class="form-group">
+                                    <label for="emailInput">E-mail:</label>
+                                    <input type="email" id="emailInput" placeholder="seu@email.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cpfRegisterInput">CPF (opcional):</label>
+                                    <input type="text" id="cpfRegisterInput" placeholder="000.000.000-00" maxlength="14">
+                                </div>
+                            </div>
+                            
+                            <!-- Tab Anônimo -->
+                            <div class="tab-pane" id="anonymousTab">
+                                <p>Você fará o pedido como cliente anônimo.</p>
+                                <p>Não será possível rastrear seus pedidos anteriores.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="customer-identification-footer">
+                        <button class="btn btn-secondary" onclick="Checkout.cancelCustomerIdentification()">
+                            Cancelar
+                        </button>
+                        <button class="btn btn-primary" onclick="Checkout.confirmCustomerIdentification()">
+                            Continuar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Bind events
+            this.bindCustomerIdentificationEvents(modal, resolve);
+        });
+    },
+
+    bindCustomerIdentificationEvents(modal, resolve) {
+        // Tab switching
+        modal.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                modal.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                modal.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                
+                btn.classList.add('active');
+                const tabId = btn.dataset.tab + 'Tab';
+                modal.querySelector('#' + tabId).classList.add('active');
+            });
+        });
+
+        // CPF mask
+        const cpfInput = modal.querySelector('#cpfInput');
+        const cpfRegisterInput = modal.querySelector('#cpfRegisterInput');
+        
+        [cpfInput, cpfRegisterInput].forEach(input => {
+            if (input) {
+                input.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                    value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                    e.target.value = value;
+                });
+            }
+        });
+
+        // Store resolve function
+        Checkout.customerIdentificationResolve = resolve;
+    },
+
+    async searchCustomerByCPF() {
+        const cpf = document.getElementById('cpfInput').value.replace(/\D/g, '');
+        if (!cpf || cpf.length !== 11) {
+            Utils.showNotification('CPF inválido', 'error');
+            return;
+        }
+
+        try {
+            // Buscar cliente por CPF (implementar endpoint)
+            const customer = await API.getCustomerByCPF(cpf);
+            if (customer) {
+                Utils.showNotification('Cliente encontrado!', 'success');
+                Checkout.selectedCustomer = customer;
+            } else {
+                Utils.showNotification('Cliente não encontrado. Tente cadastrar-se.', 'info');
+            }
+        } catch (error) {
+            Utils.showNotification('Erro ao buscar cliente: ' + error.message, 'error');
+        }
+    },
+
+    cancelCustomerIdentification() {
+        const modal = document.querySelector('.customer-identification-modal');
+        if (modal) {
+            modal.remove();
+        }
+        
+        if (Checkout.customerIdentificationResolve) {
+            Checkout.customerIdentificationResolve(null);
+            Checkout.customerIdentificationResolve = null;
+        }
+    },
+
+    async confirmCustomerIdentification() {
+        const activeTab = document.querySelector('.customer-identification-modal .tab-btn.active').dataset.tab;
+        
+        try {
+            let customer = null;
+            
+            switch (activeTab) {
+                case 'cpf':
+                    if (Checkout.selectedCustomer) {
+                        customer = Checkout.selectedCustomer;
+                    } else {
+                        Utils.showNotification('Por favor, busque um cliente por CPF primeiro', 'error');
+                        return;
+                    }
+                    break;
+                    
+                case 'register':
+                    const name = document.getElementById('nameInput').value.trim();
+                    const email = document.getElementById('emailInput').value.trim();
+                    const cpf = document.getElementById('cpfRegisterInput').value.replace(/\D/g, '');
+                    
+                    if (!name) {
+                        Utils.showNotification('Nome é obrigatório', 'error');
+                        return;
+                    }
+                    
+                    if (!email) {
+                        Utils.showNotification('E-mail é obrigatório', 'error');
+                        return;
+                    }
+                    
+                    // Criar novo cliente
+                    const customerData = {
+                        nome: name,
+                        email: email,
+                        cpf: cpf || null
+                    };
+                    
+                    customer = await API.createCustomer(customerData);
+                    Utils.showNotification('Cliente cadastrado com sucesso!', 'success');
+                    break;
+                    
+                case 'anonymous':
+                    // Criar cliente anônimo
+                    customer = await API.createCustomer({
+                        nome: 'Cliente Anônimo'
+                    });
+                    break;
+            }
+            
+            // Fechar modal
+            const modal = document.querySelector('.customer-identification-modal');
+            if (modal) {
+                modal.remove();
+            }
+            
+            // Resolver promise
+            if (Checkout.customerIdentificationResolve) {
+                Checkout.customerIdentificationResolve(customer);
+                Checkout.customerIdentificationResolve = null;
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro na identificação do cliente:', error);
+            Utils.showNotification('Erro na identificação: ' + error.message, 'error');
+        }
     },
 
     async showPaymentModal(order) {

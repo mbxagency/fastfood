@@ -15,3 +15,11 @@ def criar_ou_obter_cliente(
     service: ClienteServicePort = Depends(get_cliente_service)
 ):
     return service.criar_ou_obter_cliente(dto)
+
+@router.get("/cpf/{cpf}", response_model=ClienteResponse, summary="Buscar cliente por CPF")
+def buscar_cliente_por_cpf(
+    cpf: str,
+    service: ClienteServicePort = Depends(get_cliente_service)
+):
+    """Busca um cliente pelo CPF"""
+    return service.buscar_cliente_por_cpf(cpf)
