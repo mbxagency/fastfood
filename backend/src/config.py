@@ -27,8 +27,8 @@ class Settings(BaseSettings):
     # CORS - Get from Render environment
     CORS_ALLOW_ORIGINS_STR: str = os.getenv("CORS_ALLOW_ORIGINS", "http://localhost:3000,http://localhost:8000,https://fastfood-frontend.vercel.app,https://fastfood-murex.vercel.app")
     CORS_ALLOW_CREDENTIALS: bool = True
-    CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
-    CORS_ALLOW_HEADERS: List[str] = ["*"]
+    CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "PATCH"]
+    CORS_ALLOW_HEADERS: List[str] = ["*", "Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"]
     
     # API - Get from Render environment
     API_TITLE: str = os.getenv("PROJECT_NAME", "FastFood API")

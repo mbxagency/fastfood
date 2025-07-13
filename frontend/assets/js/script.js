@@ -803,8 +803,9 @@ const Checkout = {
             const order = await API.createOrder(orderData);
             console.log('✅ Pedido criado:', order);
             
-                        // Adicionar número do pedido à resposta
+            // Adicionar número do pedido à resposta
             order.orderNumber = orderNumber;
+            order.orderNumberDisplay = orderNumber; // Garantir que o número seja exibido corretamente
             
             // Mostrar modal de pagamento com QR Code
             await this.showPaymentModal(order);
@@ -860,15 +861,12 @@ const Checkout = {
             
             let suggestionsHtml = '';
             suggestions.forEach(suggestion => {
-                            suggestionsHtml += `
+                suggestionsHtml += `
                 <div class="suggestion-section">
-                    <h3><i class="fas ${suggestion.type === 'drink' ? 'fa-glass-martini' : 'fa-ice-cream'}"></i> ${suggestion.message}</h3>
+                    <h3>${suggestion.message}</h3>
                     <div class="suggestion-products">
                         ${suggestion.products.map(product => `
                             <div class="suggestion-product" onclick="Checkout.addSuggestionToCart('${product.id}')">
-                                <div class="product-icon">
-                                    <i class="fas ${Utils.getCategoryIcon(product.categoria)}"></i>
-                                </div>
                                 <div class="product-info">
                                     <h4>${product.nome}</h4>
                                     <p>${Utils.formatPrice(product.preco)}</p>
@@ -938,7 +936,6 @@ const Checkout = {
             modal.innerHTML = `
                 <div class="customer-identification-content">
                     <div class="customer-identification-header">
-                        <i class="fas fa-user-circle"></i>
                         <h2>Identificação do Cliente</h2>
                     </div>
                     <div class="customer-identification-body">
@@ -946,15 +943,12 @@ const Checkout = {
                         
                         <div class="identification-tabs">
                             <button class="tab-btn active" data-tab="cpf">
-                                <i class="fas fa-id-card"></i>
                                 Buscar por CPF
                             </button>
                             <button class="tab-btn" data-tab="register">
-                                <i class="fas fa-user-plus"></i>
                                 Cadastrar
                             </button>
                             <button class="tab-btn" data-tab="anonymous">
-                                <i class="fas fa-user-secret"></i>
                                 Anônimo
                             </button>
                         </div>
@@ -967,7 +961,6 @@ const Checkout = {
                                     <input type="text" id="cpfInput" placeholder="000.000.000-00" maxlength="14">
                                 </div>
                                 <button class="btn btn-primary" onclick="Checkout.searchCustomerByCPF()">
-                                    <i class="fas fa-search"></i>
                                     Buscar Cliente
                                 </button>
                             </div>
@@ -1291,8 +1284,9 @@ const Checkout = {
         console.log('🔍 Order object in confirmation:', order);
         console.log('🔍 Order ID:', order.id);
         console.log('🔍 Order Number:', order.orderNumber);
+        console.log('🔍 Order Number Display:', order.orderNumberDisplay);
         
-        const orderNumber = order.id || order.orderNumber || 'N/A';
+        const orderNumber = order.orderNumberDisplay || order.orderNumber || order.id || 'N/A';
         console.log('🔍 Final order number:', orderNumber);
         
         const modal = document.createElement('div');
@@ -1300,7 +1294,6 @@ const Checkout = {
         modal.innerHTML = `
             <div class="order-confirmation-content">
                 <div class="order-confirmation-header">
-                    <i class="fas fa-check-circle"></i>
                     <h2>Pedido Confirmado!</h2>
                 </div>
                 <div class="order-confirmation-body">
@@ -1311,19 +1304,15 @@ const Checkout = {
                 </div>
                 <div class="order-tracking">
                     <div class="tracking-step active" data-step="received">
-                        <i class="fas fa-receipt"></i>
                         <span>Recebido</span>
                     </div>
                     <div class="tracking-step" data-step="preparing">
-                        <i class="fas fa-utensils"></i>
                         <span>Em Preparação</span>
                     </div>
                     <div class="tracking-step" data-step="ready">
-                        <i class="fas fa-check"></i>
                         <span>Pronto</span>
                     </div>
                     <div class="tracking-step" data-step="finished">
-                        <i class="fas fa-flag-checkered"></i>
                         <span>Finalizado</span>
                     </div>
                 </div>
