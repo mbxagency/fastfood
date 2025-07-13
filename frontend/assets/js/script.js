@@ -2,7 +2,7 @@
 const CONFIG = {
     API_BASE_URL: 'https://fastfood-vwtq.onrender.com',
     ENDPOINTS: {
-        PRODUCTS: '/v1/api/public/produtos',
+        PRODUCTS: '/v1/api/public/produtos/',
         ORDERS: '/v1/api/public/pedidos',
         CUSTOMERS: '/v1/api/public/clientes',
         PAYMENTS: '/v1/api/public/pagamento',
@@ -12,8 +12,8 @@ const CONFIG = {
         ADMIN_CUSTOMERS: '/v1/api/admin/clientes'
     },
     ADMIN_CREDENTIALS: {
-        USERNAME: process.env.ADMIN_USERNAME || 'admin',
-        PASSWORD: process.env.ADMIN_PASSWORD || 'postech'
+        USERNAME: 'admin',
+        PASSWORD: 'postech'
     }
 };
 
@@ -100,6 +100,8 @@ const API = {
                 'Content-Type': 'application/json',
                 ...options.headers
             },
+            mode: 'cors',
+            credentials: 'omit',
             ...options
         };
 
@@ -545,55 +547,31 @@ const AdminPanel = {
 const Products = {
     async loadProducts() {
         try {
-            console.log('🔄 Iniciando carregamento de produtos...');
-            console.log('📍 URL da API:', `${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.PRODUCTS}`);
-            
             // Check cache first
             const cachedProducts = localStorage.getItem('cachedProducts');
             const cacheTimestamp = localStorage.getItem('productsCacheTimestamp');
             const now = Date.now();
             
-            console.log('💾 Cache encontrado:', !!cachedProducts);
-            console.log('⏰ Timestamp do cache:', cacheTimestamp);
-            console.log('🕐 Tempo atual:', now);
-            
             // Use cache if it's less than 5 minutes old
             if (cachedProducts && cacheTimestamp && (now - parseInt(cacheTimestamp)) < 300000) {
                 const products = JSON.parse(cachedProducts);
-                console.log('📦 Produtos carregados do cache:', products);
                 STATE.products = products;
                 this.renderProducts(products);
                 return;
             }
             
-            console.log('🌐 Fazendo requisição para o backend...');
-            
-            // Add timeout to the fetch request (reduced to 3 seconds)
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => {
-                console.log('⏰ Timeout atingido (3s)');
-                controller.abort();
-            }, 3000);
-            
             const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.PRODUCTS}`, {
-                signal: controller.signal,
                 headers: {
                     'Content-Type': 'application/json',
                     'Cache-Control': 'no-cache'
                 }
             });
             
-            clearTimeout(timeoutId);
-            
-            console.log('📡 Resposta recebida:', response.status, response.statusText);
-            
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
             const products = await response.json();
-            console.log('📦 Produtos carregados do backend:', products);
-            console.log('📊 Quantidade de produtos:', products?.length || 0);
             
             if (!products || products.length === 0) {
                 throw new Error('Nenhum produto encontrado no backend');
@@ -602,7 +580,6 @@ const Products = {
             // Cache the products
             localStorage.setItem('cachedProducts', JSON.stringify(products));
             localStorage.setItem('productsCacheTimestamp', now.toString());
-            console.log('💾 Produtos salvos no cache');
             
             STATE.products = products;
             this.renderProducts(products);
@@ -658,23 +635,28 @@ const Products = {
         
         if (!productsGrid) return;
         
-        productsGrid.innerHTML = products.length === 0 
-            ? '<p class="no-products">Nenhum produto encontrado no backend</p>'
-            : products.map(product => `
-                <div class="product-card">
-                    <div class="product-image">
-                        <i class="${Utils.getCategoryIcon(product.categoria)}"></i>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-name">${product.nome}</h3>
-                        <p class="product-category">${Utils.getCategoryName(product.categoria)}</p>
-                        <p class="product-price">${Utils.formatPrice(product.preco)}</p>
-                        <button class="add-to-cart" onclick="Products.addToCart('${product.id}')">
-                            <i class="fas fa-plus"></i> Adicionar
-                        </button>
-                    </div>
+        if (products.length === 0) {
+            productsGrid.innerHTML = '<p class="no-products">Nenhum produto encontrado no backend</p>';
+            return;
+        }
+        
+        const productsHTML = products.map(product => `
+            <div class="product-card">
+                <div class="product-image">
+                    <i class="${Utils.getCategoryIcon(product.categoria)}"></i>
                 </div>
-            `).join('');
+                <div class="product-info">
+                    <h3 class="product-name">${product.nome}</h3>
+                    <p class="product-category">${Utils.getCategoryName(product.categoria)}</p>
+                    <p class="product-price">${Utils.formatPrice(product.preco)}</p>
+                    <button class="add-to-cart" onclick="Products.addToCart('${product.id}')">
+                        <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        productsGrid.innerHTML = productsHTML;
     },
 
     addToCart(productId) {
@@ -899,8 +881,6 @@ const LoadingScreen = {
 
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🍔 BurgerHouse - Inicializando...');
-    
     // Show loading screen and force hide after 2 seconds
     LoadingScreen.show();
     LoadingScreen.init();
@@ -918,11 +898,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Load products immediately (will use cache if available)
     Products.loadProducts().catch(error => {
-        console.error('❌ Erro ao carregar produtos:', error);
+        console.error('Erro ao carregar produtos:', error);
         Utils.showNotification('Erro ao carregar produtos do backend', 'error');
     });
-    
-    console.log('✅ BurgerHouse - Inicializado com sucesso!');
 });
 
 // Fallback: Hide loading screen after 3 seconds maximum
