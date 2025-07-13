@@ -36,7 +36,13 @@ def criar_pedido(
 @router.get("/", response_model=list[PedidoResponse], summary="Listar pedidos públicos")
 def listar_pedidos_publicos(service: PedidoService = Depends(get_pedido_service)):
     """Lista pedidos para o painel público"""
-    return service.listar_pedidos_ordenados()
+    try:
+        return service.listar_pedidos_ordenados()
+    except Exception as e:
+        print(f"Erro ao listar pedidos públicos: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Erro interno do servidor: {str(e)}")
 
 @router.get("/{pedido_id}", response_model=PedidoResponse, summary="Cliente acompanha status do pedido")
 def buscar_pedido(pedido_id: UUID, service: PedidoService = Depends(get_pedido_service)):
